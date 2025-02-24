@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "880129197044",
+    "project_id": "korchagin-fitness",
+    "storage_bucket": "korchagin-fitness.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:880129197044:android:8a4e76d510e04f54ef2fa1",
+        "android_client_info": {
+          "package_name": "com.app.calorietracker.fitness_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9-lj0sai_8sJfWHhfvpSw2jr6QckEHGA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
