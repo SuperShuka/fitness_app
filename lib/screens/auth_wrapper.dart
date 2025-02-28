@@ -24,10 +24,8 @@ class AuthWrapper extends StatelessWidget {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
                   if (snapshot.data != null && snapshot.data!.exists) {
-                    print("moved to main");
                     return MainScreen();
                   } else {
-                    print("moved to profile");
                     return ProfileScreen();
                   }
                 }
