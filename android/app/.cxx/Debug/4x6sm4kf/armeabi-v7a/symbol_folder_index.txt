@@ -1,0 +1,1 @@
+/home/alexandr/StudioProjects/fitness_app/build/app/intermediates/cxx/Debug/4x6sm4kf/obj/armeabi-v7a

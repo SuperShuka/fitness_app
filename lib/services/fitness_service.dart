@@ -47,16 +47,16 @@ class FitnessService {
 
       // Request steps data
       final steps = await _health.getHealthDataFromTypes(
-        midnight,
-        now,
-        [HealthDataType.STEPS],
+        startTime: midnight,
+        endTime: now,
+        types: [HealthDataType.STEPS],
       );
 
       // Request calories burned
       final calories = await _health.getHealthDataFromTypes(
-        midnight,
-        now,
-        [HealthDataType.ACTIVE_ENERGY_BURNED],
+        startTime: midnight,
+        endTime: now,
+        types: [HealthDataType.ACTIVE_ENERGY_BURNED],
       );
 
       // Calculate totals
@@ -88,9 +88,9 @@ class FitnessService {
       final lastMonth = now.subtract(Duration(days: 30));
 
       final weightData = await _health.getHealthDataFromTypes(
-        lastMonth,
-        now,
-        [HealthDataType.WEIGHT],
+        types: [HealthDataType.WEIGHT],
+        startTime: lastMonth,
+        endTime:  now,
       );
 
       if (weightData.isNotEmpty) {
