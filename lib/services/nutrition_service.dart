@@ -3,226 +3,311 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_app/models/daily_log.dart';
 import 'package:fitness_app/models/food_item.dart';
 import 'package:fitness_app/models/meal.dart';
-import 'package:uuid/uuid.dart';
+import 'package:fitness_app/models/user_profile.dart';
 
 class NutritionService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final Uuid _uuid = Uuid();
 
-  String get _userId => _auth.currentUser!.uid;
+  String get _userId {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('User not authenticated');
+    }
+    return user.uid;
+  }
 
-  DateTime get _today {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month, now.day);
+  String _formatDateForDocId(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  Future<UserProfile> getUserProfile() async {
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(_userId)
+          .get();
+
+      if (snapshot.exists) {
+        return UserProfile.fromMap(snapshot.data()!);
+      } else {
+        return UserProfile(
+          id: _userId,
+          name: '',
+          email: _auth.currentUser?.email ?? '',
+          age: 30,
+          height: 170,
+          weight: 70,
+          goal: 'Maintain Weight',
+          activityLevel: 'Moderate',
+        );
+      }
+    } catch (e) {
+      print('Error getting user profile: $e');
+      return UserProfile(
+        id: _userId,
+        name: '',
+        email: _auth.currentUser?.email ?? '',
+        age: 30,
+        height: 170,
+        weight: 70,
+        goal: 'Maintain Weight',
+        activityLevel: 'Moderate',
+      );
+    }
+  }
+
+  Future<void> updateUserProfile(UserProfile profile) async {
+    try {
+      await _firestore
+          .collection('users')
+          .doc(_userId)
+          .set(profile.toMap());
+    } catch (e) {
+      print('Error updating user profile: $e');
+      throw e;
+    }
   }
 
   Future<DailyLog?> getDailyLog(DateTime date) async {
-    final dateString = DateTime(date.year, date.month, date.day).toIso8601String();
+    try {
+      final dateStr = _formatDateForDocId(date);
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(_userId)
+          .collection('dailyLogs')
+          .doc(dateStr)
+          .get();
 
-    final snapshot = await _db
-        .collection('dailyLogs')
-        .where('userId', isEqualTo: _userId)
-        .where('date', isEqualTo: dateString)
-        .limit(1)
-        .get();
+      if (snapshot.exists) {
+        return DailyLog.fromMap(snapshot.data()!);
+      } else {
+        final newDailyLog = DailyLog(
+          id: dateStr,
+          userId: _userId,
+          date: date,
+          meals: [
+            Meal(id: '${dateStr}_breakfast', userId: _userId, name: 'Breakfast', date: date, entries: []),
+            Meal(id: '${dateStr}_lunch', userId: _userId, name: 'Lunch', date: date, entries: []),
+            Meal(id: '${dateStr}_dinner', userId: _userId, name: 'Dinner', date: date, entries: []),
+            Meal(id: '${dateStr}_snacks', userId: _userId, name: 'Snacks', date: date, entries: []),
+          ],
+          caloriesBurned: 0,
+          weight: null,
+        );
 
-    if (snapshot.docs.isNotEmpty) {
-      return DailyLog.fromMap(snapshot.docs.first.data());
+        await _firestore
+            .collection('users')
+            .doc(_userId)
+            .collection('dailyLogs')
+            .doc(dateStr)
+            .set(newDailyLog.toMap());
+
+        return newDailyLog;
+      }
+    } catch (e) {
+      print('Error getting daily log: $e');
+      return null;
     }
-
-    final newLog = DailyLog(
-      id: _uuid.v4(),
-      userId: _userId,
-      date: date,
-      meals: [
-        Meal(id: _uuid.v4(), userId: _userId, name: 'Breakfast', date: date, entries: []),
-        Meal(id: _uuid.v4(), userId: _userId, name: 'Lunch', date: date, entries: []),
-        Meal(id: _uuid.v4(), userId: _userId, name: 'Dinner', date: date, entries: []),
-        Meal(id: _uuid.v4(), userId: _userId, name: 'Snacks', date: date, entries: []),
-      ],
-    );
-
-    await saveDailyLog(newLog);
-    return newLog;
   }
 
-  Future<void> saveDailyLog(DailyLog log) async {
-    await _db.collection('dailyLogs').doc(log.id).set(log.toMap());
-  }
-
-  Future<void> addFoodToMeal(String mealId, FoodItem food, {double servingSize = 1.0, String? notes}) async {
-    final logSnapshot = await _db
-        .collection('dailyLogs')
-        .where('userId', isEqualTo: _userId)
-        .where('meals', arrayContains: {'id': mealId})
-        .limit(1)
-        .get();
-
-    if (logSnapshot.docs.isNotEmpty) {
-      final log = DailyLog.fromMap(logSnapshot.docs.first.data());
-      final updatedMeals = log.meals.map((meal) {
-        if (meal.id == mealId) {
-          final updatedEntries = [
-            ...meal.entries,
-            MealEntry(
-              foodItem: food,
-              servingSize: servingSize,
-              notes: notes,
-            ),
-          ];
-
-          return Meal(
-            id: meal.id,
-            userId: meal.userId,
-            name: meal.name,
-            date: meal.date,
-            entries: updatedEntries,
-          );
-        }
-        return meal;
-      }).toList();
-
-      final updatedLog = DailyLog(
-        id: log.id,
-        userId: log.userId,
-        date: log.date,
-        meals: updatedMeals,
-        caloriesBurned: log.caloriesBurned,
-        stepsCount: log.stepsCount,
-        weight: log.weight,
-        notes: log.notes,
+  Future<void> addFoodToMeal(String mealId, FoodItem foodItem, {double servingSize = 1.0}) async {
+    try {
+      final parts = mealId.split('_');
+      final dateStr = parts[0];
+      final dateParts = dateStr.split('-');
+      final date = DateTime(
+        int.parse(dateParts[0]),
+        int.parse(dateParts[1]),
+        int.parse(dateParts[2]),
       );
 
-      await saveDailyLog(updatedLog);
+      final dailyLog = await getDailyLog(date);
+      if (dailyLog == null) {
+        throw Exception('Failed to get daily log');
+      }
+
+      final mealIndex = dailyLog.meals.indexWhere((meal) => meal.id == mealId);
+      if (mealIndex >= 0) {
+        final entry = FoodEntry(
+          foodItem: foodItem,
+          servingSize: servingSize,
+          timestamp: DateTime.now(),
+        );
+
+        final updatedEntries = [...dailyLog.meals[mealIndex].entries, entry];
+
+        final updatedMeal = Meal(
+          id: dailyLog.meals[mealIndex].id,
+          userId: dailyLog.meals[mealIndex].userId,
+          name: dailyLog.meals[mealIndex].name,
+          date: dailyLog.meals[mealIndex].date,
+          entries: updatedEntries,
+        );
+
+        final updatedMeals = [...dailyLog.meals];
+        updatedMeals[mealIndex] = updatedMeal;
+
+        final updatedDailyLog = DailyLog(
+          id: dailyLog.id,
+          userId: dailyLog.userId,
+          date: dailyLog.date,
+          meals: updatedMeals,
+          caloriesBurned: dailyLog.caloriesBurned,
+          weight: dailyLog.weight,
+        );
+
+        await _firestore
+            .collection('users')
+            .doc(_userId)
+            .collection('dailyLogs')
+            .doc(dateStr)
+            .set(updatedDailyLog.toMap());
+      }
+    } catch (e) {
+      print('Error adding food to meal: $e');
+      throw e;
     }
   }
 
-  Future<void> updateCaloriesBurned(double calories) async {
-    final log = await getDailyLog(_today);
-    if (log != null) {
-      final updatedLog = DailyLog(
-        id: log.id,
-        userId: log.userId,
-        date: log.date,
-        meals: log.meals,
+  Future<void> removeFoodFromMeal(String mealId, int foodIndex) async {
+    try {
+      final parts = mealId.split('_');
+      final dateStr = parts[0];
+      final dateParts = dateStr.split('-');
+      final date = DateTime(
+        int.parse(dateParts[0]),
+        int.parse(dateParts[1]),
+        int.parse(dateParts[2]),
+      );
+
+      final dailyLog = await getDailyLog(date);
+      if (dailyLog == null) {
+        throw Exception('Failed to get daily log');
+      }
+
+      final mealIndex = dailyLog.meals.indexWhere((meal) => meal.id == mealId);
+      if (mealIndex >= 0 && foodIndex < dailyLog.meals[mealIndex].entries.length) {
+        final updatedEntries = [...dailyLog.meals[mealIndex].entries];
+        updatedEntries.removeAt(foodIndex);
+
+        final updatedMeal = Meal(
+          id: dailyLog.meals[mealIndex].id,
+          userId: dailyLog.meals[mealIndex].userId,
+          name: dailyLog.meals[mealIndex].name,
+          date: dailyLog.meals[mealIndex].date,
+          entries: updatedEntries,
+        );
+
+        final updatedMeals = [...dailyLog.meals];
+        updatedMeals[mealIndex] = updatedMeal;
+
+        final updatedDailyLog = DailyLog(
+          id: dailyLog.id,
+          userId: dailyLog.userId,
+          date: dailyLog.date,
+          meals: updatedMeals,
+          caloriesBurned: dailyLog.caloriesBurned,
+          weight: dailyLog.weight,
+        );
+
+        await _firestore
+            .collection('users')
+            .doc(_userId)
+            .collection('dailyLogs')
+            .doc(dateStr)
+            .set(updatedDailyLog.toMap());
+      }
+    } catch (e) {
+      print('Error removing food from meal: $e');
+      throw e;
+    }
+  }
+
+  Future<void> updateCaloriesBurned(DateTime date, double calories) async {
+    try {
+      final dateStr = _formatDateForDocId(date);
+
+      final dailyLog = await getDailyLog(date);
+      if (dailyLog == null) {
+        throw Exception('Failed to get daily log');
+      }
+
+      final updatedDailyLog = DailyLog(
+        id: dailyLog.id,
+        userId: dailyLog.userId,
+        date: dailyLog.date,
+        meals: dailyLog.meals,
         caloriesBurned: calories,
-        stepsCount: log.stepsCount,
-        weight: log.weight,
-        notes: log.notes,
+        weight: dailyLog.weight,
       );
 
-      await saveDailyLog(updatedLog);
+      await _firestore
+          .collection('users')
+          .doc(_userId)
+          .collection('dailyLogs')
+          .doc(dateStr)
+          .set(updatedDailyLog.toMap());
+    } catch (e) {
+      print('Error updating calories burned: $e');
+      throw e;
     }
   }
 
-  Future<void> logWeight(double weight) async {
-    final log = await getDailyLog(_today);
-    if (log != null) {
-      final updatedLog = DailyLog(
-        id: log.id,
-        userId: log.userId,
-        date: log.date,
-        meals: log.meals,
-        caloriesBurned: log.caloriesBurned,
-        stepsCount: log.stepsCount,
+  Future<void> updateWeight(DateTime date, double weight) async {
+    try {
+      final dateStr = _formatDateForDocId(date);
+
+      final dailyLog = await getDailyLog(date);
+      if (dailyLog == null) {
+        throw Exception('Failed to get daily log');
+      }
+
+      final updatedDailyLog = DailyLog(
+        id: dailyLog.id,
+        userId: dailyLog.userId,
+        date: dailyLog.date,
+        meals: dailyLog.meals,
+        caloriesBurned: dailyLog.caloriesBurned,
         weight: weight,
-        notes: log.notes,
       );
 
-      await saveDailyLog(updatedLog);
+      await _firestore
+          .collection('users')
+          .doc(_userId)
+          .collection('dailyLogs')
+          .doc(dateStr)
+          .set(updatedDailyLog.toMap());
+    } catch (e) {
+      print('Error updating weight: $e');
+      throw e;
     }
   }
 
-  Future<List<Map<String, dynamic>>> getWeightHistory(int days) async {
-    final endDate = _today;
-    final startDate = endDate.subtract(Duration(days: days));
+  Future<List<FoodItem>> searchFoodItems(String query) async {
+    try {
+      if (query.isEmpty) {
+        return [];
+      }
 
-    final snapshot = await _db
-        .collection('dailyLogs')
-        .where('userId', isEqualTo: _userId)
-        .where('date', isGreaterThanOrEqualTo: startDate.toIso8601String())
-        .where('date', isLessThanOrEqualTo: endDate.toIso8601String())
-        .where('weight', isNull: false)
-        .orderBy('date')
-        .get();
+      final lowercaseQuery = query.toLowerCase();
 
-    return snapshot.docs
-        .map((doc) {
-      final data = doc.data();
-      return {
-        'date': DateTime.parse(data['date']),
-        'weight': data['weight'],
-      };
-    })
-        .toList();
+      final snapshot = await _firestore
+          .collection('foods')
+          .where('nameLower', isGreaterThanOrEqualTo: lowercaseQuery)
+          .where('nameLower', isLessThanOrEqualTo: lowercaseQuery + '\uf8ff')
+          .limit(20)
+          .get();
+
+      return snapshot.docs.map((doc) => FoodItem.fromMap(doc.data())).toList();
+    } catch (e) {
+      print('Error searching food items: $e');
+      return [];
+    }
   }
 
-  Future<List<FoodItem>> searchFood(String query) async {
-    if (query.length < 3) return [];
-
-    final snapshot = await _db
-        .collection('foods')
-        .where('name', isGreaterThanOrEqualTo: query.toLowerCase())
-        .where('name', isLessThanOrEqualTo: query.toLowerCase() + '\uf8ff')
-        .limit(20)
-        .get();
-
-    return snapshot.docs
-        .map((doc) => FoodItem.fromMap(doc.data()))
-        .toList();
-  }
-
-  Future<FoodItem> saveFood(FoodItem food) async {
-    final foodId = food.id.isEmpty ? _uuid.v4() : food.id;
-    final newFood = FoodItem(
-      id: foodId,
-      name: food.name,
-      calories: food.calories,
-      protein: food.protein,
-      carbs: food.carbs,
-      fat: food.fat,
-      imageUrl: food.imageUrl,
-      isFavorite: food.isFavorite,
-      barcode: food.barcode,
-    );
-
-    await _db.collection('foods').doc(foodId).set(newFood.toMap());
-
-    await _db.collection('users')
-        .doc(_userId)
-        .collection('myFoods')
-        .doc(foodId)
-        .set(newFood.toMap());
-
-    return newFood;
-  }
-
-  Future<List<FoodItem>> getFavoriteFoods() async {
-    final snapshot = await _db
-        .collection('users')
-        .doc(_userId)
-        .collection('myFoods')
-        .where('isFavorite', isEqualTo: true)
-        .limit(20)
-        .get();
-
-    return snapshot.docs
-        .map((doc) => FoodItem.fromMap(doc.data()))
-        .toList();
-  }
-
-  Future<List<FoodItem>> getRecentFoods() async {
-    final snapshot = await _db
-        .collection('users')
-        .doc(_userId)
-        .collection('myFoods')
-        .orderBy('name')
-        .limit(20)
-        .get();
-
-    return snapshot.docs
-        .map((doc) => FoodItem.fromMap(doc.data()))
-        .toList();
-  }
-}
+  Future<FoodItem> addCustomFoodItem(FoodItem foodItem) async {
+    try {
+      final docRef = _firestore
+          .collection('users')
+          .doc(_userI

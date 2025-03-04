@@ -8,6 +8,8 @@ import 'package:fitness_app/services/fitness_service.dart';
 import 'package:fitness_app/widgets/nutrient_progress_bar.dart';
 import 'package:fitness_app/widgets/meal_card.dart';
 
+import '../models/meal.dart';
+
 class MainScreen extends StatefulWidget {
   @override
   _MainScreenState createState() => _MainScreenState();
