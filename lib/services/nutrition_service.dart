@@ -10,16 +10,13 @@ class NutritionService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Uuid _uuid = Uuid();
 
-  // Get current user ID
   String get _userId => _auth.currentUser!.uid;
 
-  // Get today's date with time set to midnight for consistent querying
   DateTime get _today {
     final now = DateTime.now();
     return DateTime(now.year, now.month, now.day);
   }
 
-  // Get daily log for specific date
   Future<DailyLog?> getDailyLog(DateTime date) async {
     final dateString = DateTime(date.year, date.month, date.day).toIso8601String();
 
@@ -34,7 +31,6 @@ class NutritionService {
       return DailyLog.fromMap(snapshot.docs.first.data());
     }
 
-    // If no log exists for this date, create a new one with empty meals
     final newLog = DailyLog(
       id: _uuid.v4(),
       userId: _userId,
@@ -51,12 +47,10 @@ class NutritionService {
     return newLog;
   }
 
-  // Save or update daily log
   Future<void> saveDailyLog(DailyLog log) async {
     await _db.collection('dailyLogs').doc(log.id).set(log.toMap());
   }
 
-  // Add food item to a meal
   Future<void> addFoodToMeal(String mealId, FoodItem food, {double servingSize = 1.0, String? notes}) async {
     final logSnapshot = await _db
         .collection('dailyLogs')
@@ -104,7 +98,6 @@ class NutritionService {
     }
   }
 
-  // Update calories burned for today
   Future<void> updateCaloriesBurned(double calories) async {
     final log = await getDailyLog(_today);
     if (log != null) {
@@ -123,7 +116,6 @@ class NutritionService {
     }
   }
 
-  // Log weight for today
   Future<void> logWeight(double weight) async {
     final log = await getDailyLog(_today);
     if (log != null) {
@@ -142,7 +134,6 @@ class NutritionService {
     }
   }
 
-  // Get weight history
   Future<List<Map<String, dynamic>>> getWeightHistory(int days) async {
     final endDate = _today;
     final startDate = endDate.subtract(Duration(days: days));
@@ -167,7 +158,6 @@ class NutritionService {
         .toList();
   }
 
-  // Search for food in database
   Future<List<FoodItem>> searchFood(String query) async {
     if (query.length < 3) return [];
 
@@ -183,7 +173,6 @@ class NutritionService {
         .toList();
   }
 
-  // Save a new food item to database
   Future<FoodItem> saveFood(FoodItem food) async {
     final foodId = food.id.isEmpty ? _uuid.v4() : food.id;
     final newFood = FoodItem(
@@ -200,7 +189,6 @@ class NutritionService {
 
     await _db.collection('foods').doc(foodId).set(newFood.toMap());
 
-    // Also add to user's personal foods
     await _db.collection('users')
         .doc(_userId)
         .collection('myFoods')
@@ -210,7 +198,6 @@ class NutritionService {
     return newFood;
   }
 
-  // Get user's favorite foods
   Future<List<FoodItem>> getFavoriteFoods() async {
     final snapshot = await _db
         .collection('users')
@@ -225,9 +212,7 @@ class NutritionService {
         .toList();
   }
 
-  // Get user's recent foods
   Future<List<FoodItem>> getRecentFoods() async {
-    // This is a simplified approach - in a real app, you'd track and query recent usage
     final snapshot = await _db
         .collection('users')
         .doc(_userId)

@@ -3,7 +3,7 @@ import 'food_item.dart';
 class Meal {
   final String id;
   final String userId;
-  final String name; // breakfast, lunch, dinner, snack
+  final String name;
   final DateTime date;
   final List<MealEntry> entries;
 
@@ -15,7 +15,6 @@ class Meal {
     required this.entries,
   });
 
-  // Calculate total calories and nutrients for this meal
   double get totalCalories => entries.fold(0, (sum, entry) => sum + (entry.foodItem.calories * entry.servingSize));
   double get totalProtein => entries.fold(0, (sum, entry) => sum + (entry.foodItem.protein * entry.servingSize));
   double get totalCarbs => entries.fold(0, (sum, entry) => sum + (entry.foodItem.carbs * entry.servingSize));
@@ -46,7 +45,7 @@ class Meal {
 
 class MealEntry {
   final FoodItem foodItem;
-  final double servingSize; // multiplier for nutrients (0.5 = half serving, 2 = double serving)
+  final double servingSize;
   final String? notes;
 
   MealEntry({

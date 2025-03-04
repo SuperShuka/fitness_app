@@ -1,9 +1,9 @@
 class UserProfile {
   final String uid;
-  final double height; // in cm
-  final double weight; // in kg
+  final double height;
+  final double weight;
   final int age;
-  final String goal; // e.g., 'lose weight', 'gain muscle'
+  final String goal;
 
   UserProfile({
     required this.uid,

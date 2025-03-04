@@ -90,7 +90,6 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           ? Center(child: CircularProgressIndicator())
           : Column(
         children: [
-          // Meal summary card
           Card(
             margin: EdgeInsets.all(16),
             child: Padding(
@@ -111,7 +110,6 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
             ),
           ),
 
-          // Food items list
           Expanded(
             child: _meal?.entries.isEmpty ?? true
                 ? Center(

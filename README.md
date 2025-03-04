@@ -1,16 +1,1 @@
-# fitness_app
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+I want to make a calorie tracker app on flutter. The screens are: main screen(shows total calories and nutrient for today, 4 meals, burned calories counter, weight change tracker) for example of main screen use Yazio interface. Login and authorization screen(at least google authorization). Also when registered asks for height, weight and goals(lose weight, gain weight, can be changed in profile). Also I want an ability to link samsung fit, google fit, apple fit to count burned calories, i think it is easy because there should be a package for it on pub dev. Also I want to do food scan like in cal ai, but i think it might be hard to do in 1 month i have. Use firebase for authorization. With design stick to Yazio, I really like it. Dont care about copyright because it is for my school project so I wont use it anywhere else. You will help me all along the project. Please give me full code and remember it for future updates because I have only 2 weeks left. 

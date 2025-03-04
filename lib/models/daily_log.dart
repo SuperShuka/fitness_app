@@ -21,7 +21,6 @@ class DailyLog {
     this.notes,
   });
 
-  // Calculate daily totals
   double get totalCaloriesConsumed => meals.fold(0, (sum, meal) => sum + meal.totalCalories);
   double get totalProtein => meals.fold(0, (sum, meal) => sum + meal.totalProtein);
   double get totalCarbs => meals.fold(0, (sum, meal) => sum + meal.totalCarbs);

@@ -33,13 +33,10 @@ class _MainScreenState extends State<MainScreen> {
       _isLoading = true;
     });
 
-    // Load daily log for selected date
     final dailyLog = await _nutritionService.getDailyLog(_selectedDate);
 
-    // Load user profile
     final userProfile = await _nutritionService.getUserProfile();
 
-    // Try to sync fitness data
     try {
       await _fitnessService.syncFitnessData();
     } catch (e) {
@@ -53,46 +50,39 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  // Calculate daily calorie target based on user profile
   double get _calorieTarget {
     if (_userProfile == null) return 2000;
 
-    // Basic BMR calculation using Harris-Benedict equation
     double bmr;
     if (_userProfile!.age > 0 && _userProfile!.height > 0 && _userProfile!.weight > 0) {
-      // For males (this is simplified - in a full app you'd ask for gender)
       bmr = 88.362 + (13.397 * _userProfile!.weight) +
           (4.799 * _userProfile!.height) - (5.677 * _userProfile!.age);
 
-      // Adjust based on activity level (assuming moderate activity)
       bmr *= 1.55;
 
-      // Adjust based on goal
       if (_userProfile!.goal == 'Lose Weight') {
-        bmr -= 500; // 500 calorie deficit
+        bmr -= 500;
       } else if (_userProfile!.goal == 'Gain Weight' || _userProfile!.goal == 'Gain Muscle') {
-        bmr += 500; // 500 calorie surplus
+        bmr += 500;
       }
 
       return bmr;
     }
 
-    return 2000; // Default if no profile data
+    return 2000;
   }
 
-  // Calculate remaining calories
   double get _remainingCalories {
     if (_dailyLog == null) return _calorieTarget;
 
     return _calorieTarget - _dailyLog!.totalCaloriesConsumed + (_dailyLog!.caloriesBurned ?? 0);
   }
 
-  // Calculate macronutrient targets
   Map<String, double> get _macroTargets {
-    // Default macronutrient split: 40% carbs, 30% protein, 30% fat
-    double proteinTarget = (_calorieTarget * 0.3) / 4; // 4 calories per gram of protein
-    double carbsTarget = (_calorieTarget * 0.4) / 4;   // 4 calories per gram of carbs
-    double fatTarget = (_calorieTarget * 0.3) / 9;     // 9 calories per gram of fat
+
+    double proteinTarget = (_calorieTarget * 0.3) / 4;
+    double carbsTarget = (_calorieTarget * 0.4) / 4;
+    double fatTarget = (_calorieTarget * 0.3) / 9;
 
     return {
       'protein': proteinTarget,
@@ -185,7 +175,6 @@ class _MainScreenState extends State<MainScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Calories overview card
               Card(
                 elevation: 4,
                 child: Padding(
@@ -236,7 +225,6 @@ class _MainScreenState extends State<MainScreen> {
 
               SizedBox(height: 16),
 
-              // Macronutrients card
               Card(
                 elevation: 4,
                 child: Padding(
@@ -279,7 +267,6 @@ class _MainScreenState extends State<MainScreen> {
 
               SizedBox(height: 16),
 
-              // Meals section
               Text(
                 'Meals',
                 style: TextStyle(
@@ -289,7 +276,6 @@ class _MainScreenState extends State<MainScreen> {
               ),
               SizedBox(height: 8),
 
-              // Breakfast card
               _buildMealCard(
                 'Breakfast',
                 Icons.wb_sunny,
@@ -297,7 +283,6 @@ class _MainScreenState extends State<MainScreen> {
                     Meal(id: '', userId: '', name: 'Breakfast', date: DateTime.now(), entries: [])),
               ),
 
-              // Lunch card
               _buildMealCard(
                 'Lunch',
                 Icons.restaurant,
@@ -305,7 +290,6 @@ class _MainScreenState extends State<MainScreen> {
                     Meal(id: '', userId: '', name: 'Lunch', date: DateTime.now(), entries: [])),
               ),
 
-              // Dinner card
               _buildMealCard(
                 'Dinner',
                 Icons.dinner_dining,
@@ -313,7 +297,6 @@ class _MainScreenState extends State<MainScreen> {
                     Meal(id: '', userId: '', name: 'Dinner', date: DateTime.now(), entries: [])),
               ),
 
-              // Snacks card
               _buildMealCard(
                 'Snacks',
                 Icons.cake,
@@ -323,7 +306,6 @@ class _MainScreenState extends State<MainScreen> {
 
               SizedBox(height: 16),
 
-              // Weight tracking card (if data available)
               if (_dailyLog?.weight != null)
                 Card(
                   elevation: 4,

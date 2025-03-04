@@ -4,12 +4,10 @@ import '../models/user_profile.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // Save user data to Firestore
   Future<void> saveUserData(UserProfile user) async {
     await _db.collection('users').doc(user.uid).set(user.toMap());
   }
 
-  // Fetch user data
   Future<UserProfile?> getUserData(String uid) async {
     DocumentSnapshot doc = await _db.collection('users').doc(uid).get();
     if (doc.exists) {
