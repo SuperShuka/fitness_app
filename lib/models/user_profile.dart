@@ -1,5 +1,5 @@
 class UserProfile {
-  final String id;
+  final String uid;
   final String name;
   final String email;
   final int age;
@@ -10,7 +10,7 @@ class UserProfile {
   final String gender; // 'male' or 'female'
 
   UserProfile({
-    required this.id,
+    required this.uid,
     required this.name,
     required this.email,
     required this.age,
@@ -23,7 +23,7 @@ class UserProfile {
 
   factory UserProfile.fromMap(Map<String, dynamic> map) {
     return UserProfile(
-      id: map['id'] ?? '',
+      uid: map['id'] ?? '',
       name: map['name'] ?? '',
       email: map['email'] ?? '',
       age: map['age'] ?? 30,
@@ -37,7 +37,7 @@ class UserProfile {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      'id': uid,
       'name': name,
       'email': email,
       'age': age,
@@ -63,7 +63,7 @@ class UserProfile {
     Map<String, dynamic>? preferences,
   }) {
     return UserProfile(
-      id: id ?? this.id,
+      uid: id ?? this.uid,
       name: name ?? this.name,
       email: email ?? this.email,
       age: age ?? this.age,

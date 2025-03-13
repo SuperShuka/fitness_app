@@ -144,22 +144,6 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                     _removeFoodEntry(index);
                   },
                   child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.blue[100],
-                      child: foodItem.imageUrl != null
-                          ? ClipOval(
-                        child: Image.network(
-                          foodItem.imageUrl!,
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(Icons.restaurant);
-                          },
-                        ),
-                      )
-                          : Icon(Icons.restaurant),
-                    ),
                     title: Text(foodItem.name),
                     subtitle: Text(
                       'Serving size: ${servingSize.toStringAsFixed(1)}',

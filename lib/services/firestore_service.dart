@@ -11,7 +11,7 @@ class FirestoreService {
   Future<UserProfile?> getUserData(String uid) async {
     DocumentSnapshot doc = await _db.collection('users').doc(uid).get();
     if (doc.exists) {
-      return UserProfile.fromMap(doc.data() as Map<String, dynamic>, uid);
+      return UserProfile.fromMap(doc.data() as Map<String, dynamic>);
     }
     return null;
   }

@@ -54,7 +54,7 @@ class FitnessService {
       final totalCalories = calories.fold(0.0, (sum, data) => sum + (double.tryParse(data.value.toString()) ?? 0));
 
       if (totalCalories > 0) {
-        await _nutritionService.updateCaloriesBurned(totalCalories);
+        await _nutritionService.updateCaloriesBurned(DateTime.now(), totalCalories);
       }
 
       await _db.collection('users').doc(_userId).update({
@@ -90,7 +90,7 @@ class FitnessService {
             'weight': latestWeight,
           });
 
-          await _nutritionService.logWeight(latestWeight);
+          await _nutritionService.updateWeight(DateTime.now(), latestWeight);
 
           return latestWeight;
         }

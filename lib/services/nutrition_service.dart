@@ -17,6 +17,70 @@ class NutritionService {
     return user.uid;
   }
 
+  Future<List<FoodItem>> searchFoods(String query) async {
+    try {
+      if (query.trim().isEmpty) {
+        return [];
+      }
+
+      // Search in both predefined foods and custom foods
+      final predefinedFoodsQuery = await _firestore
+          .collection('foods')
+          .where('nameLower', isGreaterThanOrEqualTo: query.toLowerCase())
+          .where('nameLower', isLessThanOrEqualTo: query.toLowerCase() + '\uf8ff')
+          .limit(10)
+          .get();
+
+      final customFoodsQuery = await _firestore
+          .collection('users')
+          .doc(_userId)
+          .collection('customFoods')
+          .where('nameLower', isGreaterThanOrEqualTo: query.toLowerCase())
+          .where('nameLower', isLessThanOrEqualTo: query.toLowerCase() + '\uf8ff')
+          .limit(10)
+          .get();
+
+      final predefinedFoods = predefinedFoodsQuery.docs
+          .map((doc) => FoodItem.fromMap(doc.data()))
+          .toList();
+
+      final customFoods = customFoodsQuery.docs
+          .map((doc) => FoodItem.fromMap(doc.data()))
+          .toList();
+
+      final combinedFoods = [
+        ...predefinedFoods,
+        ...customFoods.map((food) => food.copyWith(isCustom: true))
+      ];
+
+      for (var food in combinedFoods) {
+        food = food.copyWith(isFavorite: food.isFavorite);
+      }
+
+      return combinedFoods;
+    } catch (e) {
+      print('Error searching foods: $e');
+      return [];
+    }
+  }
+
+  // Method to update a food item (us*ed in toggling favorite)
+  Future<void> updateFoodItem(FoodItem foodItem) async {
+    try {
+      if (foodItem.isCustom ?? false) {
+        await _firestore
+            .collection('users')
+            .doc(_userId)
+            .collection('customFoods')
+            .doc(foodItem.id)
+            .set(foodItem.toMap());
+      }
+
+      foodItem = foodItem.copyWith(isFavorite: true);
+    } catch (e) {
+      print('Error updating food item: $e');
+    }
+  }
   String _formatDateForDocId(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
@@ -32,7 +96,7 @@ class NutritionService {
         return UserProfile.fromMap(snapshot.data()!);
       } else {
         return UserProfile(
-          id: _userId,
+          uid: _userId,
           name: '',
           email: _auth.currentUser?.email ?? '',
           age: 30,
@@ -45,7 +109,7 @@ class NutritionService {
     } catch (e) {
       print('Error getting user profile: $e');
       return UserProfile(
-        id: _userId,
+        uid: _userId,
         name: '',
         email: _auth.currentUser?.email ?? '',
         age: 30,
@@ -135,7 +199,7 @@ class NutritionService {
           timestamp: DateTime.now(),
         );
 
-        final updatedEntries = [...dailyLog.meals[mealIndex].entries, entry];
+        final updatedEntries = dailyLog.meals[mealIndex].entries;
 
         final updatedMeal = Meal(
           id: dailyLog.meals[mealIndex].id,

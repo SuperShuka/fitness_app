@@ -1,4 +1,5 @@
-import 'package:fitness_app/screens/profile_screen.dart';
+import 'package:fitness_app/screens/profile_setup_flow.dart';
+import 'package:fitness_app/utils/debug_print.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,7 +14,9 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           final user = snapshot.data;
+          dPrint(user?.uid);
           if (user == null) {
+            dPrint("Moved to login screen");
             return LoginScreen();
           } else {
             return FutureBuilder<DocumentSnapshot>(
@@ -26,7 +29,8 @@ class AuthWrapper extends StatelessWidget {
                   if (snapshot.data != null && snapshot.data!.exists) {
                     return MainScreen();
                   } else {
-                    return ProfileScreen();
+                    dPrint("Moved to profile screen");
+                    return ProfileSetupFlow();
                   }
                 }
                 return CircularProgressIndicator();

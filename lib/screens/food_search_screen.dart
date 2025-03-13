@@ -89,7 +89,6 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
       protein: foodItem.protein,
       carbs: foodItem.carbs,
       fat: foodItem.fat,
-      imageUrl: foodItem.imageUrl,
       isFavorite: !foodItem.isFavorite,
       barcode: foodItem.barcode,
     );
@@ -283,22 +282,22 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
 
   Widget _buildFoodItem(FoodItem food) {
     return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: Colors.blue[100],
-        child: food.imageUrl != null
-            ? ClipOval(
-          child: Image.network(
-            food.imageUrl!,
-            width: 40,
-            height: 40,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Icon(Icons.restaurant);
-            },
-          ),
-        )
-            : Icon(Icons.restaurant),
-      ),
+      // leading: CircleAvatar(
+      //   backgroundColor: Colors.blue[100],
+      //   child: food.imageUrl != null
+      //       ? ClipOval(
+      //     child: Image.network(
+      //       food.imageUrl!,
+      //       width: 40,
+      //       height: 40,
+      //       fit: BoxFit.cover,
+      //       errorBuilder: (context, error, stackTrace) {
+      //         return Icon(Icons.restaurant);
+      //       },
+      //     ),
+      //   )
+      //       : Icon(Icons.restaurant),
+      // ),
       title: Text(food.name),
       subtitle: Text(
         'P: ${food.protein.toStringAsFixed(1)}g  '
