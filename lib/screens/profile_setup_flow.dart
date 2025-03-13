@@ -11,320 +11,533 @@ class ProfileSetupFlow extends StatefulWidget {
 
 class _ProfileSetupFlowState extends State<ProfileSetupFlow> {
   final NutritionService _nutritionService = NutritionService();
+  final PageController _pageController = PageController();
   int _currentStep = 0;
+  final int _totalSteps = 8;
 
-  String? _gender;
-  double _height = 170;
-  double _weight = 70;
-  int _age = 30;
-  String? _goal;
-  String? _activityLevel;
+  String? _primaryGoal;
+  String? _workoutFrequency;
+  String? _birthYear;
+  double _height = 177;
+  double _weight = 60;
+  final double _weeklyGoal = 1.0;
 
-  Widget _buildCustomSlider({
-    required String label,
-    required double value,
-    required double min,
-    required double max,
-    required String unit,
-    required ValueChanged<double> onChanged,
-  }) {
-    return Column(
-      children: [
-        Text(
-          '$label: ${value.round()} $unit',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        SliderTheme(
-          data: SliderThemeData(
-            activeTrackColor: Colors.blue,
-            inactiveTrackColor: Colors.blue.shade100,
-            thumbColor: Colors.blue,
-            overlayColor: Colors.blue.withAlpha(32),
-            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 12),
-            overlayShape: RoundSliderOverlayShape(overlayRadius: 24),
-          ),
-          child: Slider(
-            value: value,
-            min: min,
-            max: max,
-            divisions: (max - min).round(),
-            label: value.round().toString(),
-            onChanged: onChanged,
-          ),
-        ),
-      ],
-    );
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
-
-  // Gender selection step
-  Widget _buildGenderStep() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Select Your Gender',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildGenderButton('Male', Icons.male, _gender == 'male'),
-            SizedBox(width: 20),
-            _buildGenderButton('Female', Icons.female, _gender == 'female'),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGenderButton(String gender, IconData icon, bool isSelected) {
-    return ElevatedButton(
-      onPressed: () {
-        setState(() {
-          _gender = gender.toLowerCase();
-        });
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isSelected ? Colors.blue : Colors.grey.shade200,
-        foregroundColor: isSelected ? Colors.white : Colors.black,
-        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 60),
-          SizedBox(height: 10),
-          Text(gender, style: TextStyle(fontSize: 16)),
-        ],
-      ),
-    );
-  }
-
-  // Physical details step
-  Widget _buildPhysicalDetailsStep() {
-    return Column(
-      children: [
-        _buildCustomSlider(
-          label: 'Height',
-          value: _height,
-          min: 50,
-          max: 250,
-          unit: 'cm',
-          onChanged: (value) {
-            setState(() {
-              _height = value;
-            });
-          },
-        ),
-        SizedBox(height: 20),
-        _buildCustomSlider(
-          label: 'Weight',
-          value: _weight,
-          min: 20,
-          max: 300,
-          unit: 'kg',
-          onChanged: (value) {
-            setState(() {
-              _weight = value;
-            });
-          },
-        ),
-        SizedBox(height: 20),
-        _buildCustomSlider(
-          label: 'Age',
-          value: _age.toDouble(),
-          min: 0,
-          max: 120,
-          unit: 'years',
-          onChanged: (value) {
-            setState(() {
-              _age = value.round();
-            });
-          },
-        ),
-      ],
-    );
-  }
-
-  // Goal selection step
-  Widget _buildGoalStep() {
-    final goals = [
-      'Lose Weight',
-      'Maintain Weight',
-      'Gain Muscle',
-      'Gain Weight'
-    ];
-
-    return Column(
-      children: [
-        Text(
-          'Choose Your Goal',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 20),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: goals.map((goal) =>
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _goal = goal;
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _goal == goal ? Colors.blue : Colors.grey.shade200,
-                  foregroundColor: _goal == goal ? Colors.white : Colors.black,
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                child: Text(goal),
-              )
-          ).toList(),
-        ),
-      ],
-    );
-  }
-
-  // Activity level step
-  Widget _buildActivityLevelStep() {
-    final activityLevels = [
-      'Sedentary',
-      'Lightly Active',
-      'Moderately Active',
-      'Very Active',
-      'Extra Active'
-    ];
-
-    return Column(
-      children: [
-        Text(
-          'Select Activity Level',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 20),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: activityLevels.map((level) =>
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _activityLevel = level;
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _activityLevel == level ? Colors.blue : Colors.grey.shade200,
-                  foregroundColor: _activityLevel == level ? Colors.white : Colors.black,
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                child: Text(level),
-              )
-          ).toList(),
-        ),
-      ],
-    );
-  }
-
-  // Save profile and complete setup
-  Future<void> _saveProfile() async {
-    if (_gender == null || _goal == null || _activityLevel == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please complete all steps'))
+  void _nextStep() {
+    if (_currentStep < _totalSteps - 1) {
+      setState(() {
+        _currentStep++;
+      });
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => MainApp(
+          primaryGoal: _primaryGoal,
+          workoutFrequency: _workoutFrequency,
+          birthYear: _birthYear,
+          height: _height,
+          weight: _weight,
+          weeklyGoal: _weeklyGoal,
+        )),
       );
-      return;
     }
+  }
 
-    final profile = UserProfile(
-      uid: FirebaseAuth.instance.currentUser!.uid,
-      email: FirebaseAuth.instance.currentUser!.email ?? '',
-      name: FirebaseAuth.instance.currentUser!.displayName ?? '',
-      gender: _gender!,
-      height: _height,
-      weight: _weight,
-      age: _age,
-      goal: _goal!,
-      activityLevel: _activityLevel!,
-    );
-
-    try {
-      await _nutritionService.updateUserProfile(profile);
-      Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => MainScreen())
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving profile: $e'))
-      );
+  void _previousStep() {
+    if (_currentStep > 0) {
+      setState(() {
+        _currentStep--;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final steps = [
-      _buildGenderStep(),
-      _buildPhysicalDetailsStep(),
-      _buildGoalStep(),
-      _buildActivityLevelStep(),
-    ];
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Complete Your Profile'),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(10),
-          child: LinearProgressIndicator(
-            value: (_currentStep + 1) / steps.length,
-            backgroundColor: Colors.grey.shade300,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-          ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: _currentStep > 0
+            ? IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: _previousStep,
+        )
+            : null,
+        title: Text(
+          'Step ${_currentStep + 1} of $_totalSteps',
+          style: TextStyle(color: Colors.black),
         ),
+        centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                children: [
+                  Image.asset('assets/flag_us.png', height: 16),
+                  SizedBox(width: 4),
+                  Text('EN', style: TextStyle(color: Colors.black)),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: Container(
+        color: Colors.white,
         child: Column(
           children: [
             Expanded(
-              child: steps[_currentStep],
+              child: _buildCurrentStep(),
             ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (_currentStep > 0)
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _currentStep--;
-                      });
-                    },
-                    child: Text('Previous'),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: _nextStep,
+                child: Text('Next'),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.black,
+                  minimumSize: Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
                   ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_currentStep < steps.length - 1) {
-                      setState(() {
-                        _currentStep++;
-                      });
-                    } else {
-                      _saveProfile();
-                    }
-                  },
-                  child: Text(_currentStep < steps.length - 1 ? 'Next' : 'Finish'),
                 ),
-              ],
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCurrentStep() {
+    switch (_currentStep) {
+      case 0:
+        return _buildGenderStep();
+      case 1:
+        return _buildPrimaryGoalStep();
+      case 2:
+        return _buildWorkoutFrequencyStep();
+      case 3:
+        return _buildBirthYearStep();
+      case 4:
+        return _buildHeightStep();
+      case 5:
+        return _buildWeightStep();
+      case 6:
+        return _buildWeeklyGoalStep();
+      default:
+        return Container();
+    }
+  }
+
+  Widget _buildGenderStep() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Select your gender',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 40),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildGenderOption('Male', 'assets/images/male_icon.png', _gender == 'male'),
+              _buildGenderOption('Female', 'assets/images/female_icon.png', _gender == 'female'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenderOption(String gender, String imagePath, bool isSelected) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _gender = gender.toLowerCase();
+        });
+      },
+      child: Container(
+        width: 140,
+        height: 180,
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue.shade50 : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(
+            color: isSelected ? Colors.blue : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              gender == 'Male' ? Icons.male : Icons.female,
+              size: 80,
+              color: isSelected ? Colors.blue : Colors.grey.shade600,
+            ),
+            SizedBox(height: 16),
+            Text(
+              gender,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? Colors.blue : Colors.grey.shade800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrimaryGoalStep() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "What's your primary goal?",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 30),
+          _buildGoalOption('Lose Weight', '🔥', 'lose_weight'),
+          SizedBox(height: 16),
+          _buildGoalOption('Maintain Weight', '⚖️', 'maintain_weight'),
+          SizedBox(height: 16),
+          _buildGoalOption('Gain Weight', '💪', 'gain_weight'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGoalOption(String title, String emoji, String value) {
+    final isSelected = _primaryGoal == value;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _primaryGoal = value;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(
+            color: isSelected ? Colors.black : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Text(emoji, style: TextStyle(fontSize: 24)),
+            SizedBox(width: 16),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorkoutFrequencyStep() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "How often do you workout?",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 30),
+          _buildFrequencyOption('0-2 workouts now and then', '😌', 'beginner'),
+          SizedBox(height: 16),
+          _buildFrequencyOption('3-5 a few workouts per week', '💪', 'intermediate'),
+          SizedBox(height: 16),
+          _buildFrequencyOption('6+ dedicated athlete', '🗿', 'advanced'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFrequencyOption(String title, String emoji, String value) {
+    final isSelected = _workoutFrequency == value;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _workoutFrequency = value;
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(
+            color: isSelected ? Colors.black : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Text(emoji, style: TextStyle(fontSize: 24)),
+            SizedBox(width: 16),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBirthYearStep() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "What is your Birth Year?",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 30),
+          Expanded(
+            child: ListView.builder(
+              itemCount: 10,
+              itemBuilder: (context, index) {
+                final year = 2005 - index + 2;
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _birthYear = year.toString();
+                    });
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: _birthYear == year.toString() ? Colors.grey.shade200 : Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Center(
+                      child: Text(
+                        year.toString(),
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: _birthYear == year.toString() ? FontWeight.bold : FontWeight.normal,
+                          color: _birthYear == year.toString() ? Colors.black : Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeightStep() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "What is your Height?",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.horizontal(left: Radius.circular(20)),
+                ),
+                child: Text(
+                  'CM',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.horizontal(right: Radius.circular(20)),
+                ),
+                child: Text(
+                  'FT',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 30),
+          Center(
+            child: Text(
+              '${_height.toInt()} cm',
+              style: TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Stack(
+              children: [
+                Center(
+                  child: Image.asset(
+                    'assets/height_silhouette.png',
+                    color: Colors.grey.shade300,
+                    height: 300,
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 100,
+                  child: Container(
+                    height: 200,
+                    child: Slider(
+                      value: _height,
+                      min: 140,
+                      max: 220,
+                      divisions: 160,
+                      activeColor: Colors.black,
+                      inactiveColor: Colors.grey.shade300,
+                      onChanged: (value) {
+                        setState(() {
+                          _height = value;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeightStep() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "What is your current Weight?",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.horizontal(left: Radius.circular(20)),
+                ),
+                child: Text(
+                  'KG',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.horizontal(right: Radius.circular(20)),
+                ),
+                child: Text(
+                  'LB',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 30),
+          Center(
+            child: Text(
+              '${_weight.toInt()} kg',
+              style: TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Center(
+              child: Container(
+                height: 80,
+                child: Slider(
+                  value: _weight,
+                  min: 40,
+                  max: 120,
+                  divisions: 160,
+                  activeColor: Colors.black,
+                  inactiveColor: Colors.grey.shade300,
+                  onChanged: (value) {
+                    setState(() {
+                      _weight = value;
+                    });
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,120 +1,112 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserProfile {
   final String uid;
-  final String name;
   final String email;
+  final String name;
+  final String gender;
+  final double height;
+  final double weight;
   final int age;
-  final double height; // in cm
-  final double weight; // in kg
-  final String goal; // 'Lose Weight', 'Maintain Weight', 'Gain Weight'
-  final String activityLevel; // 'Sedentary', 'Lightly Active', 'Moderately Active', 'Very Active', 'Extra Active'
-  final String gender; // 'male' or 'female'
+  final String goal;
+  final String activityLevel;
+  final int dailyCalorieTarget;
+  final int dailyProteinTarget;
+  final int dailyCarbsTarget;
+  final int dailyFatTarget;
+  final int dailyWaterTarget;
 
   UserProfile({
     required this.uid,
-    required this.name,
     required this.email,
-    required this.age,
+    required this.name,
+    required this.gender,
     required this.height,
     required this.weight,
+    required this.age,
     required this.goal,
     required this.activityLevel,
-    this.gender = 'male'
+    this.dailyCalorieTarget = 0,
+    this.dailyProteinTarget = 0,
+    this.dailyCarbsTarget = 0,
+    this.dailyFatTarget = 0,
+    this.dailyWaterTarget = 0,
   });
-
-  factory UserProfile.fromMap(Map<String, dynamic> map) {
-    return UserProfile(
-      uid: map['id'] ?? '',
-      name: map['name'] ?? '',
-      email: map['email'] ?? '',
-      age: map['age'] ?? 30,
-      height: (map['height'] ?? 170).toDouble(),
-      weight: (map['weight'] ?? 70).toDouble(),
-      goal: map['goal'] ?? 'Maintain Weight',
-      activityLevel: map['activityLevel'] ?? 'Moderately Active',
-      gender: map['gender'] ?? 'male'
-    );
-  }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': uid,
-      'name': name,
+      'uid': uid,
       'email': email,
-      'age': age,
+      'name': name,
+      'gender': gender,
       'height': height,
       'weight': weight,
+      'age': age,
       'goal': goal,
       'activityLevel': activityLevel,
-      'gender': gender,
+      'dailyCalorieTarget': dailyCalorieTarget,
+      'dailyProteinTarget': dailyProteinTarget,
+      'dailyCarbsTarget': dailyCarbsTarget,
+      'dailyFatTarget': dailyFatTarget,
+      'dailyWaterTarget': dailyWaterTarget,
     };
   }
 
-  UserProfile copyWith({
-    String? id,
-    String? name,
-    String? email,
-    int? age,
-    double? height,
-    double? weight,
-    String? goal,
-    String? activityLevel,
-    String? gender,
-    String? photoUrl,
-    Map<String, dynamic>? preferences,
-  }) {
+  factory UserProfile.fromMap(Map<String, dynamic> map) {
     return UserProfile(
-      uid: id ?? this.uid,
-      name: name ?? this.name,
-      email: email ?? this.email,
-      age: age ?? this.age,
-      height: height ?? this.height,
-      weight: weight ?? this.weight,
-      goal: goal ?? this.goal,
-      activityLevel: activityLevel ?? this.activityLevel,
-      gender: gender ?? this.gender,
+      uid: map['uid'] ?? '',
+      email: map['email'] ?? '',
+      name: map['name'] ?? '',
+      gender: map['gender'] ?? '',
+      height: (map['height'] ?? 0).toDouble(),
+      weight: (map['weight'] ?? 0).toDouble(),
+      age: map['age'] ?? 0,
+      goal: map['goal'] ?? '',
+      activityLevel: map['activityLevel'] ?? '',
+      dailyCalorieTarget: map['dailyCalorieTarget'] ?? 0,
+      dailyProteinTarget: map['dailyProteinTarget'] ?? 0,
+      dailyCarbsTarget: map['dailyCarbsTarget'] ?? 0,
+      dailyFatTarget: map['dailyFatTarget'] ?? 0,
+      dailyWaterTarget: map['dailyWaterTarget'] ?? 0,
     );
   }
 
-  // Helper methods for daily calorie targets based on profile data
-  double get bmr {
-    if (gender == 'male') {
-      return 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age);
-    } else {
-      return 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
-    }
+  factory UserProfile.fromDocument(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return UserProfile.fromMap(data);
   }
 
-  double get activityMultiplier {
-    switch (activityLevel) {
-      case 'Sedentary':
-        return 1.2;
-      case 'Lightly Active':
-        return 1.375;
-      case 'Moderately Active':
-        return 1.55;
-      case 'Very Active':
-        return 1.725;
-      case 'Extra Active':
-        return 1.9;
-      default:
-        return 1.375;
-    }
+  UserProfile copyWith({
+    String? uid,
+    String? email,
+    String? name,
+    String? gender,
+    double? height,
+    double? weight,
+    int? age,
+    String? goal,
+    String? activityLevel,
+    int? dailyCalorieTarget,
+    int? dailyProteinTarget,
+    int? dailyCarbsTarget,
+    int? dailyFatTarget,
+    int? dailyWaterTarget,
+  }) {
+    return UserProfile(
+      uid: uid ?? this.uid,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      gender: gender ?? this.gender,
+      height: height ?? this.height,
+      weight: weight ?? this.weight,
+      age: age ?? this.age,
+      goal: goal ?? this.goal,
+      activityLevel: activityLevel ?? this.activityLevel,
+      dailyCalorieTarget: dailyCalorieTarget ?? this.dailyCalorieTarget,
+      dailyProteinTarget: dailyProteinTarget ?? this.dailyProteinTarget,
+      dailyCarbsTarget: dailyCarbsTarget ?? this.dailyCarbsTarget,
+      dailyFatTarget: dailyFatTarget ?? this.dailyFatTarget,
+      dailyWaterTarget: dailyWaterTarget ?? this.dailyWaterTarget,
+    );
   }
-
-  double get dailyCalories {
-    final tdee = bmr * activityMultiplier;
-
-    switch (goal) {
-      case 'Lose Weight':
-        return tdee - 500;
-      case 'Gain Weight':
-        return tdee + 500;
-      default:
-        return tdee;
-    }
-  }
-
-  double get proteinTarget => (dailyCalories * 0.3) / 4;
-  double get carbsTarget => (dailyCalories * 0.4) / 4;
-  double get fatTarget => (dailyCalories * 0.3) / 9;
 }
