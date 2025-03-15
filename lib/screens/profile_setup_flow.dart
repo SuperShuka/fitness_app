@@ -75,13 +75,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> {
                 border: Border.all(color: Colors.grey.shade300),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Row(
-                children: [
-                  Image.asset('assets/flag_us.png', height: 16),
-                  SizedBox(width: 4),
-                  Text('EN', style: TextStyle(color: Colors.black)),
-                ],
-              ),
             ),
           ),
         ],
@@ -396,18 +389,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> {
                   style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.horizontal(right: Radius.circular(20)),
-                ),
-                child: Text(
-                  'FT',
-                  style: TextStyle(color: Colors.black),
-                ),
-              ),
             ],
           ),
           SizedBox(height: 30),
@@ -424,16 +405,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> {
             child: Stack(
               children: [
                 Center(
-                  child: Image.asset(
-                    'assets/height_silhouette.png',
-                    color: Colors.grey.shade300,
-                    height: 300,
-                  ),
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 100,
                   child: Container(
                     height: 200,
                     child: Slider(
