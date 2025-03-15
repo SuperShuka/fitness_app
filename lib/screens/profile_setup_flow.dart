@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_profile.dart';
 import '../services/nutrition_service.dart';
+import 'package:fitness_app/services/firestore_service.dart';
 import 'main_screen.dart';
 
 class ProfileSetupFlow extends StatefulWidget {
@@ -10,17 +11,20 @@ class ProfileSetupFlow extends StatefulWidget {
 }
 
 class _ProfileSetupFlowState extends State<ProfileSetupFlow> {
-  final NutritionService _nutritionService = NutritionService();
+  final FirestoreService _firestoreService = FirestoreService();
   final PageController _pageController = PageController();
   int _currentStep = 0;
-  final int _totalSteps = 8;
+  int _totalSteps = 8;
 
+  String? _gender;
   String? _primaryGoal;
   String? _workoutFrequency;
   String? _birthYear;
   double _height = 177;
   double _weight = 60;
-  final double _weeklyGoal = 1.0;
+  double _targetWeight = 60;
+  double _weeklyGoal = 1.0;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -33,16 +37,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> {
         _currentStep++;
       });
     } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => MainApp(
-          primaryGoal: _primaryGoal,
-          workoutFrequency: _workoutFrequency,
-          birthYear: _birthYear,
-          height: _height,
-          weight: _weight,
-          weeklyGoal: _weeklyGoal,
-        )),
-      );
+      _saveUserDataAndNavigate();
     }
   }
 
@@ -104,7 +99,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> {
                 onPressed: _nextStep,
                 child: Text('Next'),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.black,
+                  backgroundColor: Colors.black,
                   minimumSize: Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
@@ -133,36 +128,42 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> {
       case 5:
         return _buildWeightStep();
       case 6:
-        return _buildWeeklyGoalStep();
+        if (_primaryGoal == 'maintain_weight') {
+          _currentStep++;
+          return _buildWeeklyGoalStep();
+        } else {
+          return _buildTargetWeightStep();
+        }
+      case 7:
+          return _buildWeeklyGoalStep();
       default:
-        return Container();
+        return _buildLoadingScreen();
     }
   }
 
   Widget _buildGenderStep() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 24),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Select your gender',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            "Select your gender",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          SizedBox(height: 40),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildGenderOption('Male', 'assets/images/male_icon.png', _gender == 'male'),
-              _buildGenderOption('Female', 'assets/images/female_icon.png', _gender == 'female'),
-            ],
-          ),
+          SizedBox(height: 30),
+          _buildGenderOption('Male', '👨', _gender == 'male'),
+          SizedBox(height: 16),
+          _buildGenderOption('Female', '👩', _gender == 'female'),
         ],
       ),
     );
   }
 
-  Widget _buildGenderOption(String gender, String imagePath, bool isSelected) {
+  Widget _buildGenderOption(String gender, String emoji, bool isSelected) {
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -170,31 +171,24 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> {
         });
       },
       child: Container(
-        width: 140,
-        height: 180,
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.shade50 : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(15),
+          color: Colors.white,
           border: Border.all(
-            color: isSelected ? Colors.blue : Colors.grey.shade300,
+            color: isSelected ? Colors.black : Colors.grey.shade300,
             width: isSelected ? 2 : 1,
           ),
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Row(
           children: [
-            Icon(
-              gender == 'Male' ? Icons.male : Icons.female,
-              size: 80,
-              color: isSelected ? Colors.blue : Colors.grey.shade600,
-            ),
-            SizedBox(height: 16),
+            Text(emoji, style: TextStyle(fontSize: 24)),
+            SizedBox(width: 16),
             Text(
               gender,
               style: TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.blue : Colors.grey.shade800,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -540,5 +534,233 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> {
         ],
       ),
     );
+
+  }
+  Widget _buildTargetWeightStep() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "What is your target Weight?",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.horizontal(left: Radius.circular(20)),
+                ),
+                child: Text(
+                  'KG',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.horizontal(right: Radius.circular(20)),
+                ),
+                child: Text(
+                  'LB',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 30),
+          Center(
+            child: Text(
+              '${_targetWeight.toInt()} kg',
+              style: TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Center(
+              child: Container(
+                height: 80,
+                child: Slider(
+                  value: _targetWeight,
+                  min: 40,
+                  max: 120,
+                  divisions: 160,
+                  activeColor: Colors.black,
+                  inactiveColor: Colors.grey.shade300,
+                  onChanged: (value) {
+                    setState(() {
+                      _targetWeight = value;
+                    });
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildWeeklyGoalStep() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "What is your weekly goal?",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 30),
+          Center(
+            child: Text(
+              '${_weeklyGoal.toStringAsFixed(1)} kg/week',
+              style: TextStyle(
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Center(
+              child: Container(
+                height: 80,
+                child: Slider(
+                  value: _weeklyGoal,
+                  min: 0.1,
+                  max: 2.0,
+                  divisions: 19,
+                  activeColor: Colors.black,
+                  inactiveColor: Colors.grey.shade300,
+                  onChanged: (value) {
+                    setState(() {
+                      _weeklyGoal = value;
+                    });
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildLoadingScreen() {
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            "Building your personal program",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 40),
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveUserDataAndNavigate() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Create initial user profile
+        UserProfile userProfile = UserProfile(
+          uid: user.uid,
+          email: user.email,
+          gender: _gender,
+          height: _height,
+          weight: _weight,
+          targetWeight: _primaryGoal == 'maintain_weight' ? _weight : _targetWeight,
+          birthYear: _birthYear,
+          goal: _primaryGoal,
+          activityLevel: _workoutFrequency,
+          weeklyGoal: _weeklyGoal,
+        );
+
+        // Calculate nutrition targets
+        userProfile = await _firestoreService.calculateNutritionTargets(userProfile);
+
+        // Save to Firestore
+        await _firestoreService.saveUserProfile(userProfile);
+
+        // Show success dialog after a short delay to simulate processing
+        await Future.delayed(Duration(seconds: 2));
+        _showSuccessAndNavigate(userProfile);
+      }
+    } catch (e) {
+      print('Error saving user data: $e');
+      // Show error dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Error'),
+          content: Text('Failed to save your profile. Please try again.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showSuccessAndNavigate(UserProfile userProfile) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle, color: Colors.green, size: 50),
+              SizedBox(height: 16),
+              Text(
+                "Your program is ready!",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    Future.delayed(Duration(seconds: 1), () {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => MainScreen()),
+      );
+    });
   }
 }
