@@ -711,9 +711,9 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
   Widget _buildHeightStep() {
 
-    final double minHeight = _useMetric ? 140.0;
-    final double maxHeight = _useMetric ? 220.0 : 87.0;
-    final int divisions = _useMetric ? 80 : 32;
+    final double minHeight = 140.0;
+    final double maxHeight =  220.0;
+    final int divisions =  80;
 
     if (_height < minHeight) _height = minHeight;
     if (_height > maxHeight) _height = maxHeight;
@@ -721,16 +721,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
     String displayHeight;
     String unitText;
 
-    if (_useMetric) {
       displayHeight = '${_height.toInt()}';
       unitText = 'cm';
-    } else {
-
-      int feet = (_height / 12).floor();
-      int inches = (_height % 12).round();
-      displayHeight = '$feet\'$inches\"';
-      unitText = '';
-    }
 
     double personPosition = 180 - (((_height - minHeight) / (maxHeight - minHeight)) * 180);
 
@@ -848,10 +840,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                       return Positioned(
                         left: 30,
                         bottom: (180 / 5) * index,
-                        child: Text(
-                          _useMetric
-                              ? '${(minHeight + ((maxHeight - minHeight) / 5) * (5 - index)).toInt()}'
-                              : '${((minHeight + ((maxHeight - minHeight) / 5) * (5 - index)) / 12).floor()}\'',
+                        child: Text('${(minHeight + ((maxHeight - minHeight) / 5) * (5 - index)).toInt()}',
                           style: TextStyle(
                             fontSize: 10,
                             color: AppColors.textLight,
@@ -946,9 +935,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
               _buildAdjustButton(Icons.remove, () {
                 if (_height > minHeight) {
                   setState(() {
-                    _height = _useMetric
-                        ? _height - 1.0
-                        : _height - 0.5;
+                    _height = _height - 1.0;
                   });
                   HapticFeedback.lightImpact();
                 }
@@ -972,9 +959,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
               _buildAdjustButton(Icons.add, () {
                 if (_height < maxHeight) {
                   setState(() {
-                    _height = _useMetric
-                        ? _height + 1.0
-                        : _height + 0.5;
+                    _height = _height + 1.0;
                   });
                   HapticFeedback.lightImpact();
                 }
@@ -989,19 +974,13 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  _useMetric
-                      ? '${minHeight.toInt()} cm'
-                      : '${(minHeight / 12).floor()}\'${(minHeight % 12).round()}\"',
+                Text('${minHeight.toInt()} cm',
                   style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 14,
                   ),
                 ),
-                Text(
-                  _useMetric
-                      ? '${maxHeight.toInt()} cm'
-                      : '${(maxHeight / 12).floor()}\'${(maxHeight % 12).round()}\"',
+                Text('${maxHeight.toInt()} cm',
                   style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 14,
@@ -1044,16 +1023,16 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
   Widget _buildWeightStep() {
 
-    final double minWeight = _useMetric ? 30.0 : 66.0;
-    final double maxWeight = _useMetric ? 150.0 : 330.0;
-    final int divisions = _useMetric ? 120 : 264;
+    final double minWeight = 30.0;
+    final double maxWeight = 150.0;
+    final int divisions = 120;
 
     if (_weight < minWeight) _weight = minWeight;
     if (_weight > maxWeight) _weight = maxWeight;
 
     String displayWeight = '${_weight.toInt()}';
 
-    String unitText = _useMetric ? 'kg' : 'lb';
+    String unitText = 'kg';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
