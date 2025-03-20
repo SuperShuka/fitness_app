@@ -40,21 +40,22 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
   double _weeklyGoal = 1.0;
   bool _isLoading = false;
 
-  // Track if a selection has been made on the current page
   bool get _currentPageHasSelection {
     switch (_currentStep) {
       case 0:
-        return _gender != null;
+        return true;
       case 1:
-        return _primaryGoal != null;
+        return _gender != null;
       case 2:
-        return _workoutFrequency != null;
+        return _primaryGoal != null;
       case 3:
-        return _birthYear != null;
+        return _workoutFrequency != null;
       case 4:
+        return _birthYear != null;
       case 5:
       case 6:
       case 7:
+      case 8:
         return true;
       default:
         return false;
@@ -69,7 +70,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
       duration: Duration(milliseconds: 300),
     );
 
-    // Set status bar color to match app theme
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
@@ -87,7 +87,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
     if (!_currentPageHasSelection) {
       // Provide haptic feedback and visual indication that a selection is required
       HapticFeedback.mediumImpact();
-      _animationController.forward().then((_) => _animationController.reverse());
+      _animationController.forward().then((_) =>
+          _animationController.reverse());
       return;
     }
 
@@ -133,12 +134,14 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
             children: [
               // Custom app bar
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 12),
                 child: Row(
                   children: [
                     _currentStep > 0
                         ? IconButton(
-                      icon: Icon(Icons.arrow_back_ios_new, color: AppColors.text),
+                      icon: Icon(
+                          Icons.arrow_back_ios_new, color: AppColors.text),
                       onPressed: _previousStep,
                     )
                         : SizedBox(width: 48),
@@ -176,7 +179,9 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                 animation: _animationController,
                 builder: (context, child) {
                   return Transform.translate(
-                    offset: Offset(_animationController.value * 10 * ((_animationController.value * 10).floor() % 2 == 0 ? 1 : -1), 0),
+                    offset: Offset(
+                        _animationController.value * 10 * ((_animationController
+                            .value * 10).floor() % 2 == 0 ? 1 : -1), 0),
                     child: child,
                   );
                 },
@@ -186,7 +191,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                     onPressed: _nextStep,
                     child: Text(
                       _currentStep == _totalSteps - 1 ? 'Finish' : 'Continue',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -216,7 +222,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
           width: index == _currentStep ? 16 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: index <= _currentStep ? AppColors.primary : Colors.grey.shade300,
+            color: index <= _currentStep ? AppColors.primary : Colors.grey
+                .shade300,
             borderRadius: BorderRadius.circular(4),
           ),
         );
@@ -349,17 +356,21 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
             ),
           ),
           SizedBox(height: 40),
-          _buildGoalOption('Lose Weight', Icons.trending_down, '🔥', 'lose_weight'),
+          _buildGoalOption(
+              'Lose Weight', Icons.trending_down, '🔥', 'lose_weight'),
           SizedBox(height: 20),
-          _buildGoalOption('Maintain Weight', Icons.balance, '⚖️', 'maintain_weight'),
+          _buildGoalOption(
+              'Maintain Weight', Icons.balance, '⚖️', 'maintain_weight'),
           SizedBox(height: 20),
-          _buildGoalOption('Gain Weight', Icons.trending_up, '💪', 'gain_weight'),
+          _buildGoalOption(
+              'Gain Weight', Icons.trending_up, '💪', 'gain_weight'),
         ],
       ),
     );
   }
 
-  Widget _buildGoalOption(String title, IconData icon, String emoji, String value) {
+  Widget _buildGoalOption(String title, IconData icon, String emoji,
+      String value) {
     final isSelected = _primaryGoal == value;
 
     return AnimatedContainer(
@@ -414,7 +425,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                     title,
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight
+                          .w500,
                       color: isSelected ? AppColors.primary : AppColors.text,
                     ),
                   ),
@@ -508,7 +520,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
     );
   }
 
-  Widget _buildFrequencyOption(String title, String subtitle, IconData icon, String emoji, String value) {
+  Widget _buildFrequencyOption(String title, String subtitle, IconData icon,
+      String emoji, String value) {
     final isSelected = _workoutFrequency == value;
 
     return AnimatedContainer(
@@ -563,7 +576,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                     title,
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight
+                          .w500,
                       color: isSelected ? AppColors.primary : AppColors.text,
                     ),
                   ),
@@ -590,7 +604,9 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
   Widget _buildBirthYearStep() {
     // Current year
-    final int currentYear = DateTime.now().year;
+    final int currentYear = DateTime
+        .now()
+        .year;
     // Create a list of years from (currentYear - 80) to (currentYear - 14)
     final List<int> years = List.generate(
       67,
@@ -639,10 +655,16 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                 children: [
                   // Center highlight for selected year
                   Positioned(
-                    top: (MediaQuery.of(context).size.height / 2) - 100,
+                    top: (MediaQuery
+                        .of(context)
+                        .size
+                        .height / 2) - 100,
                     child: Container(
                       height: 60,
-                      width: MediaQuery.of(context).size.width - 48,
+                      width: MediaQuery
+                          .of(context)
+                          .size
+                          .width - 48,
                       decoration: BoxDecoration(
                         color: AppColors.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -669,8 +691,11 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                             year.toString(),
                             style: TextStyle(
                               fontSize: isSelected ? 24 : 20,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                              color: isSelected ? AppColors.primary : AppColors.textLight,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                              color: isSelected ? AppColors.primary : AppColors
+                                  .textLight,
                             ),
                           ),
                         );
@@ -688,12 +713,39 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
   }
 
   Widget _buildHeightStep() {
+    // Set height ranges based on unit system
+    final double minHeight = _useMetric ? 140.0; // 55 inches = ~4'7"
+    final double maxHeight = _useMetric ? 220.0 : 87.0; // 87 inches = 7'3"
+    final int divisions = _useMetric ? 80 : 32;
+
+    // Ensure height is within valid range for current unit system
+    if (_height < minHeight) _height = minHeight;
+    if (_height > maxHeight) _height = maxHeight;
+
+    // Height display format and unit text
+    String displayHeight;
+    String unitText;
+
+    if (_useMetric) {
+      displayHeight = '${_height.toInt()}';
+      unitText = 'cm';
+    } else {
+      // Convert height to feet and inches display
+      int feet = (_height / 12).floor();
+      int inches = (_height % 12).round();
+      displayHeight = '$feet\'$inches\"';
+      unitText = '';
+    }
+
+    // Calculate position for person icon on height visualization
+    double personPosition = 180 - (((_height - minHeight) / (maxHeight - minHeight)) * 180);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 40),
+          const SizedBox(height: 40),
           Text(
             "Body measurements",
             style: TextStyle(
@@ -702,7 +754,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
               color: AppColors.text,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             "What is your height?",
             style: TextStyle(
@@ -711,95 +763,176 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 40),
+          const SizedBox(height: 40),
+
+          // Height display - Modern design
           Center(
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 40),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primary.withOpacity(0.8),
+                    AppColors.primary,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text(
-                    '${_height.toInt()}',
-                    style: TextStyle(
-                      fontSize: 60,
+                    displayHeight,
+                    style: const TextStyle(
+                      fontSize: 64,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                      color: Colors.white,
                     ),
                   ),
-                  SizedBox(width: 8),
-                  Text(
-                    'cm',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textLight,
+                  if (unitText.isNotEmpty) const SizedBox(width: 8),
+                  if (unitText.isNotEmpty)
+                    Text(
+                      unitText,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
           ),
-          SizedBox(height: 60),
 
-          // Custom slider with height visualization
-          Container(
-            height: 200,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Height visualization
-                Positioned(
-                  left: 40,
-                  child: Container(
-                    width: 20,
-                    height: 180,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.grey.shade300, AppColors.primary],
+          const SizedBox(height: 60),
+
+          // Custom height visualization with slider
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Left side - visualization
+              SizedBox(
+                width: 100,
+                height: 220,
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    // Height visualization bar
+                    Container(
+                      width: 24,
+                      height: 180,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            AppColors.primary.withOpacity(0.3),
+                            AppColors.primary,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      borderRadius: BorderRadius.circular(10),
                     ),
-                  ),
-                ),
-                // Human icon
-                Positioned(
-                  left: 30,
-                  top: 180 - ((_height - 140) / 80 * 180),
-                  child: Icon(
-                    Icons.person,
-                    size: 40,
-                    color: Colors.white,
-                  ),
-                ),
-                // Slider
-                SliderTheme(
-                  data: SliderThemeData(
-                    trackHeight: 8,
-                    activeTrackColor: AppColors.primary,
-                    inactiveTrackColor: Colors.grey.shade300,
-                    thumbColor: Colors.white,
-                    thumbShape: RoundSliderThumbShape(
-                      enabledThumbRadius: 12,
-                      elevation: 4,
+
+                    // Height markers
+                    ...List.generate(6, (index) {
+                      return Positioned(
+                        left: 30,
+                        bottom: (180 / 5) * index,
+                        child: Text(
+                          _useMetric
+                              ? '${(minHeight + ((maxHeight - minHeight) / 5) * (5 - index)).toInt()}'
+                              : '${((minHeight + ((maxHeight - minHeight) / 5) * (5 - index)) / 12).floor()}\'',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppColors.textLight,
+                          ),
+                        ),
+                      );
+                    }),
+
+                    // Person icon with indicator line
+                    Positioned(
+                      bottom: personPosition.clamp(0.0, 180.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withOpacity(0.3),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.person,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                          Container(
+                            width: 12,
+                            height: 2,
+                            color: AppColors.primary,
+                          ),
+                        ],
+                      ),
                     ),
-                    overlayColor: AppColors.primary.withOpacity(0.2),
-                    overlayShape: RoundSliderOverlayShape(overlayRadius: 24),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 40),
+
+              // Right side - vertical slider
+              SliderTheme(
+                data: SliderThemeData(
+                  trackHeight: 8,
+                  activeTrackColor: AppColors.primary,
+                  inactiveTrackColor: Colors.grey.shade200,
+                  thumbColor: Colors.white,
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 14,
+                    elevation: 6,
                   ),
+                  overlayColor: AppColors.primary.withOpacity(0.2),
+                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 28),
+                ),
+                child: SizedBox(
+                  height: 220,
                   child: RotatedBox(
                     quarterTurns: 3,
-                    child: Container(
+                    child: SizedBox(
                       width: 180,
                       child: Slider(
-                        value: _height,
-                        min: 140,
-                        max: 220,
-                        divisions: 80,
+                        value: _height.clamp(minHeight, maxHeight),
+                        min: minHeight,
+                        max: maxHeight,
+                        divisions: divisions,
                         onChanged: (value) {
                           setState(() {
                             _height = value;
@@ -812,45 +945,82 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
 
-          // Unit toggle
-          Center(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'CM',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+          const SizedBox(height: 40),
+
+          // Fine tune controls for height
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildAdjustButton(Icons.remove, () {
+                if (_height > minHeight) {
+                  setState(() {
+                    _height = _useMetric
+                        ? _height - 1.0  // Decrement by 1 cm
+                        : _height - 0.5; // Decrement by 0.5 inch
+                  });
+                  HapticFeedback.lightImpact();
+                }
+              }),
+              const SizedBox(width: 16),
+              Container(
+                width: 200,
+                height: 8,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.blue.shade300,
+                      AppColors.primary,
+                      Colors.orange.shade300,
+                    ],
                   ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-                    child: Text(
-                      'FT',
-                      style: TextStyle(
-                        color: AppColors.text,
-                      ),
-                    ),
-                  ),
-                ],
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
+              const SizedBox(width: 16),
+              _buildAdjustButton(Icons.add, () {
+                if (_height < maxHeight) {
+                  setState(() {
+                    _height = _useMetric
+                        ? _height + 1.0  // Increment by 1 cm
+                        : _height + 0.5; // Increment by 0.5 inch
+                  });
+                  HapticFeedback.lightImpact();
+                }
+              }),
+            ],
+          ),
+
+          const SizedBox(height: 30),
+
+          // Height range indicators
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _useMetric
+                      ? '${minHeight.toInt()} cm'
+                      : '${(minHeight / 12).floor()}\'${(minHeight % 12).round()}\"',
+                  style: TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  _useMetric
+                      ? '${maxHeight.toInt()} cm'
+                      : '${(maxHeight / 12).floor()}\'${(maxHeight % 12).round()}\"',
+                  style: TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -858,167 +1028,260 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
     );
   }
 
+// Helper widget for height/weight adjustment buttons - same as in weight step
+  Widget _buildAdjustButton(IconData icon, VoidCallback onPressed) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.shade300,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(
+          icon,
+          color: AppColors.primary,
+          size: 24,
+        ),
+      ),
+    );
+  }
+
   Widget _buildWeightStep() {
+    // Set weight ranges based on unit system
+    final double minWeight = _useMetric ? 30.0 : 66.0;
+    final double maxWeight = _useMetric ? 150.0 : 330.0;
+    final int divisions = _useMetric ? 120 : 264;
+
+    // Ensure weight is within valid range for current unit system
+    if (_weight < minWeight) _weight = minWeight;
+    if (_weight > maxWeight) _weight = maxWeight;
+
+    // Weight display format
+    String displayWeight = '${_weight.toInt()}';
+
+    // Unit text
+    String unitText = _useMetric ? 'kg' : 'lb';
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-          SizedBox(height: 40),
-      Text(
-        "Body measurements",
-        style: TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.bold,
-          color: AppColors.text,
-        ),
-      ),
-      SizedBox(height: 16),
-      Text(
-        "What is your current weight?",
-        style: TextStyle(
-          fontSize: 20,
-          color: AppColors.textLight,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      SizedBox(height: 40),
-      Center(
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(16),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 40),
+          Text(
+            "Body measurements",
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: AppColors.text,
+            ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${_weight.toInt()}',
-                style: TextStyle(
-                  fontSize: 60,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-              SizedBox(width: 8),
-              Text(
-                'kg',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textLight,
-                ),
-              ),
-            ],
+          const SizedBox(height: 16),
+          Text(
+            "What is your current weight?",
+            style: TextStyle(
+              fontSize: 20,
+              color: AppColors.textLight,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-      ),
-      SizedBox(height: 60),
+          const SizedBox(height: 40),
 
-      // Weight visualization
-      Center(
-        child: Container(
-          width: 200,
-          height: 200,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Background circle
-              Container(
-                width: 200,
-                height: 200,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey.shade100,
-                ),
-              ),
-              // Progress circle
-              CircularProgressIndicator(
-                value: (_weight - 40) / 80, // 40 to 120 range
-                strokeWidth: 12,
-                backgroundColor: Colors.grey.shade300,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-              ),
-              // Weight icon
-              Icon(
-                Icons.fitness_center,
-                size: 40,
-                color: AppColors.primary,
-              ),
-            ],
-          ),
-        ),
-      ),
-
-      SliderTheme(
-      data: SliderThemeData(
-      trackHeight: 8,
-      activeTrackColor: AppColors.primary,
-      inactiveTrackColor: Colors.grey.shade300,
-      thumbColor: Colors.white,
-      thumbShape: RoundSliderThumbShape(
-        enabledThumbRadius: 12,
-        elevation: 4,
-      ),
-      overlayColor: AppColors.primary.withOpacity(0.2),
-      overlayShape: RoundSliderOverlayShape(overlayRadius: 24),
-    ),
-    child: Slider(
-      value: _weight,
-      min: 40,
-      max: 120,
-      divisions: 80,
-      onChanged: (value) {
-        setState(() {
-          _weight = value;
-        });
-        if ((value * 10) % 10 == 0) {
-          HapticFeedback.selectionClick();
-        }
-      },
-    ),
-      ),
-
-            // Unit toggle
-            Center(
-              child: Container(
-                margin: EdgeInsets.only(top: 16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        'KG',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-                      child: Text(
-                        'LB',
-                        style: TextStyle(
-                          color: AppColors.text,
-                        ),
-                      ),
-                    ),
+          // Weight display - Modern design
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 40),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primary.withOpacity(0.8),
+                    AppColors.primary,
                   ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    displayWeight,
+                    style: const TextStyle(
+                      fontSize: 64,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    unitText,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
+
+          const SizedBox(height: 60),
+
+          // Fine tune controls
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildAdjustButton(Icons.remove, () {
+                if (_weight > minWeight) {
+                  setState(() {
+                    _weight = _weight - 1.0;
+                  });
+                  HapticFeedback.lightImpact();
+                }
+              }),
+              const SizedBox(width: 16),
+              Container(
+                width: 200,
+                height: 8,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.blue.shade300,
+                      AppColors.primary,
+                      Colors.orange.shade300,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(width: 16),
+              _buildAdjustButton(Icons.add, () {
+                if (_weight < maxWeight) {
+                  setState(() {
+                    _weight = _weight + 1.0;
+                  });
+                  HapticFeedback.lightImpact();
+                }
+              }),
+            ],
+          ),
+
+          const SizedBox(height: 40),
+
+          // Weight slider - Enhanced design
+          SliderTheme(
+            data: SliderThemeData(
+              trackHeight: 8,
+              activeTrackColor: AppColors.primary,
+              inactiveTrackColor: Colors.grey.shade200,
+              thumbColor: Colors.white,
+              thumbShape: const RoundSliderThumbShape(
+                enabledThumbRadius: 14,
+                elevation: 6,
+              ),
+              overlayColor: AppColors.primary.withOpacity(0.2),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 28),
+            ),
+            child: Slider(
+              value: _weight.clamp(minWeight, maxWeight), // Ensure the value is in valid range
+              min: minWeight,
+              max: maxWeight,
+              divisions: divisions,
+              onChanged: (value) {
+                setState(() {
+                  _weight = value;
+                });
+                if ((value * 10) % 10 == 0) {
+                  HapticFeedback.selectionClick();
+                }
+              },
+            ),
+          ),
+
+          const SizedBox(height: 30),
+
+          // Weight range indicators
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${minWeight.toInt()} $unitText',
+                  style: TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  '${maxWeight.toInt()} $unitText',
+                  style: TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 50),
+
+          // Helpful weight context
+          _buildWeightContext(),
+        ],
+      ),
+    );
+  }
+
+// Helper widget for weight context information
+  Widget _buildWeightContext() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline,
+            color: AppColors.primary,
+            size: 24,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              "Weight data helps us personalize your calorie goals. "
+                  "You'll be able to track your progress over time.",
+              style: TextStyle(
+                color: AppColors.textLight,
+                fontSize: 14,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1030,13 +1293,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
       return _buildWeeklyGoalStep();
     }
 
-    // Display an up arrow if gaining weight, down arrow if losing weight
-    IconData trendIcon = _primaryGoal == 'gain_weight'
-        ? Icons.trending_up
-        : Icons.trending_down;
-    Color trendColor = _primaryGoal == 'gain_weight'
-        ? Colors.green
-        : Colors.red;
+    IconData trendIcon = Icons.trending_flat;
+    Color trendColor = Colors.green;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -1111,7 +1369,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                     ),
                     SizedBox(height: 8),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(12),
@@ -1145,7 +1404,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                     ),
                     SizedBox(height: 8),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: trendColor.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
@@ -1463,15 +1723,137 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
   Widget _buildLoadingScreen() {
     return Container(
-        padding: EdgeInsets.all(24.0),
-    child: Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-    // Add Lottie animation here if available
-    // Lottie.asset('assets/animations/loading.json', width: 200, height: 200),
+      padding: EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Add Lottie animation
+          Lottie.asset(
+            'assets/animations/loading.json',
+            width: 200,
+            height: 200,
+            fit: BoxFit.contain,
+          ),
+          SizedBox(height: 40),
+          Text(
+            "Setting up your personalized plan",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: AppColors.text,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 16),
+          Text(
+            "We're calculating your nutrition needs and preparing your fitness journey",
+            style: TextStyle(
+              fontSize: 16,
+              color: AppColors.textLight,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 40),
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+            strokeWidth: 6,
+          ),
+        ],
+      ),
+    );
+  }
 
-    // Fallback to circular progress indicator
-    Container(
-    width: 100,
-    height: 100,
-    padding: EdgeInsets.all(16
+  Future<void> _saveUserDataAndNavigate() async {
+    setState(() {
+      _isLoading = true;
+      _pageController.animateToPage(
+        _totalSteps,
+        duration: Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    });
+
+    try {
+      // Get current user
+      User? currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser == null) {
+        throw Exception("No authenticated user found");
+      }
+
+      // Calculate age from birth year
+      final currentYear = DateTime
+          .now()
+          .year;
+      final age = currentYear - int.parse(_birthYear!);
+
+      // Calculate BMR and daily calorie needs using the NutritionService
+      final nutritionService = NutritionService();
+      final dailyCalories = nutritionService.calculateDailyCalories(
+        gender: _gender!,
+        age: age,
+        height: _height,
+        weight: _weight,
+        activityLevel: _workoutFrequency!,
+        goal: _primaryGoal!,
+      );
+
+      // Calculate macro distribution
+      final macros = nutritionService.calculateMacroDistribution(
+        calories: dailyCalories,
+        goal: _primaryGoal!,
+      );
+
+      // Create user profile object
+      final userProfile = UserProfile(
+        userId: currentUser.uid,
+        email: currentUser.email ?? '',
+        displayName: currentUser.displayName ?? '',
+        gender: _gender!,
+        birthYear: _birthYear!,
+        height: _height,
+        weight: _weight,
+        targetWeight: _targetWeight,
+        primaryGoal: _primaryGoal!,
+        workoutFrequency: _workoutFrequency!,
+        weeklyGoal: _weeklyGoal,
+        dailyCalories: dailyCalories,
+        proteinGoal: macros['protein']!,
+        carbsGoal: macros['carbs']!,
+        fatGoal: macros['fat']!,
+        waterGoal: 2000,
+        // Default water goal in ml
+        createdAt: DateTime.now(),
+        lastUpdated: DateTime.now(),
+      );
+
+      // Save user profile to Firestore
+      await _firestoreService.saveUserProfile(userProfile);
+
+      // Add a slight delay for better UX
+      await Future.delayed(Duration(seconds: 2));
+
+      // Navigate to main screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => MainScreen(),
+        ),
+      );
+    } catch (e) {
+      // Handle errors
+      setState(() {
+        _isLoading = false;
+        _currentStep = _totalSteps - 1; // Go back to the last input screen
+      });
+
+      // Show error snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error saving profile: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+}

@@ -1,130 +1,134 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+// lib/models/user_profile.dart
 
 class UserProfile {
-  final String uid;
-  final String? email;
-  final String? name;
-  final String? gender;
+  final String userId;
+  final String email;
+  final String displayName;
+  final String gender;
+  final String birthYear;
   final double height;
   final double weight;
-  final double? targetWeight;
-  final String? birthYear;
-  final int? age;
-  final String? goal;
-  final String? activityLevel;
-  final double? weeklyGoal;
-  final int? dailyCalorieTarget;
-  final int? dailyProteinTarget;
-  final int? dailyCarbsTarget;
-  final int? dailyFatTarget;
-  final int? dailyWaterTarget;
+  final double targetWeight;
+  final String primaryGoal;
+  final String workoutFrequency;
+  final double weeklyGoal;
+  final int dailyCalories;
+  final int proteinGoal;
+  final int carbsGoal;
+  final int fatGoal;
+  final int waterGoal;
+  final DateTime createdAt;
+  final DateTime lastUpdated;
 
   UserProfile({
-    required this.uid,
-    this.email,
-    this.name,
-    this.gender,
+    required this.userId,
+    required this.email,
+    required this.displayName,
+    required this.gender,
+    required this.birthYear,
     required this.height,
     required this.weight,
-    this.targetWeight,
-    this.birthYear,
-    this.age,
-    this.goal,
-    this.activityLevel,
-    this.weeklyGoal,
-    this.dailyCalorieTarget = 0,
-    this.dailyProteinTarget = 0,
-    this.dailyCarbsTarget = 0,
-    this.dailyFatTarget = 0,
-    this.dailyWaterTarget = 0,
+    required this.targetWeight,
+    required this.primaryGoal,
+    required this.workoutFrequency,
+    required this.weeklyGoal,
+    required this.dailyCalories,
+    required this.proteinGoal,
+    required this.carbsGoal,
+    required this.fatGoal,
+    required this.waterGoal,
+    required this.createdAt,
+    required this.lastUpdated,
   });
 
-  Map<String, dynamic> toMap() {
-    return {
-      'uid': uid,
-      'email': email,
-      'name': name,
-      'gender': gender,
-      'height': height,
-      'weight': weight,
-      'targetWeight': targetWeight,
-      'birthYear': birthYear,
-      'age': age,
-      'goal': goal,
-      'activityLevel': activityLevel,
-      'weeklyGoal': weeklyGoal,
-      'dailyCalorieTarget': dailyCalorieTarget,
-      'dailyProteinTarget': dailyProteinTarget,
-      'dailyCarbsTarget': dailyCarbsTarget,
-      'dailyFatTarget': dailyFatTarget,
-      'dailyWaterTarget': dailyWaterTarget,
-    };
-  }
-
-  factory UserProfile.fromMap(Map<String, dynamic> map) {
+  // Create from Firestore document
+  factory UserProfile.fromMap(Map<String, dynamic> data) {
     return UserProfile(
-      uid: map['uid'] ?? '',
-      email: map['email'],
-      name: map['name'],
-      gender: map['gender'],
-      height: (map['height'] ?? 0).toDouble(),
-      weight: (map['weight'] ?? 0).toDouble(),
-      targetWeight: map['targetWeight']?.toDouble(),
-      birthYear: map['birthYear'],
-      age: map['age'],
-      goal: map['goal'],
-      activityLevel: map['activityLevel'],
-      weeklyGoal: map['weeklyGoal']?.toDouble(),
-      dailyCalorieTarget: map['dailyCalorieTarget'],
-      dailyProteinTarget: map['dailyProteinTarget'],
-      dailyCarbsTarget: map['dailyCarbsTarget'],
-      dailyFatTarget: map['dailyFatTarget'],
-      dailyWaterTarget: map['dailyWaterTarget'],
+      userId: data['userId'] ?? '',
+      email: data['email'] ?? '',
+      displayName: data['displayName'] ?? '',
+      gender: data['gender'] ?? '',
+      birthYear: data['birthYear'] ?? '',
+      height: (data['height'] ?? 0).toDouble(),
+      weight: (data['weight'] ?? 0).toDouble(),
+      targetWeight: (data['targetWeight'] ?? 0).toDouble(),
+      primaryGoal: data['primaryGoal'] ?? '',
+      workoutFrequency: data['workoutFrequency'] ?? '',
+      weeklyGoal: (data['weeklyGoal'] ?? 0).toDouble(),
+      dailyCalories: data['dailyCalories'] ?? 0,
+      proteinGoal: data['proteinGoal'] ?? 0,
+      carbsGoal: data['carbsGoal'] ?? 0,
+      fatGoal: data['fatGoal'] ?? 0,
+      waterGoal: data['waterGoal'] ?? 0,
+      createdAt: data['createdAt']?.toDate() ?? DateTime.now(),
+      lastUpdated: data['lastUpdated']?.toDate() ?? DateTime.now(),
     );
   }
 
-  factory UserProfile.fromDocument(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return UserProfile.fromMap(data);
+  // Convert to Map for Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'userId': userId,
+      'email': email,
+      'displayName': displayName,
+      'gender': gender,
+      'birthYear': birthYear,
+      'height': height,
+      'weight': weight,
+      'targetWeight': targetWeight,
+      'primaryGoal': primaryGoal,
+      'workoutFrequency': workoutFrequency,
+      'weeklyGoal': weeklyGoal,
+      'dailyCalories': dailyCalories,
+      'proteinGoal': proteinGoal,
+      'carbsGoal': carbsGoal,
+      'fatGoal': fatGoal,
+      'waterGoal': waterGoal,
+      'createdAt': createdAt,
+      'lastUpdated': lastUpdated,
+    };
   }
 
+  // Create a copy with updated values
   UserProfile copyWith({
-    String? uid,
+    String? userId,
     String? email,
-    String? name,
+    String? displayName,
     String? gender,
+    String? birthYear,
     double? height,
     double? weight,
     double? targetWeight,
-    String? birthYear,
-    int? age,
-    String? goal,
-    String? activityLevel,
+    String? primaryGoal,
+    String? workoutFrequency,
     double? weeklyGoal,
-    int? dailyCalorieTarget,
-    int? dailyProteinTarget,
-    int? dailyCarbsTarget,
-    int? dailyFatTarget,
-    int? dailyWaterTarget,
+    int? dailyCalories,
+    int? proteinGoal,
+    int? carbsGoal,
+    int? fatGoal,
+    int? waterGoal,
+    DateTime? createdAt,
+    DateTime? lastUpdated,
   }) {
     return UserProfile(
-      uid: uid ?? this.uid,
+      userId: userId ?? this.userId,
       email: email ?? this.email,
-      name: name ?? this.name,
+      displayName: displayName ?? this.displayName,
       gender: gender ?? this.gender,
+      birthYear: birthYear ?? this.birthYear,
       height: height ?? this.height,
       weight: weight ?? this.weight,
       targetWeight: targetWeight ?? this.targetWeight,
-      birthYear: birthYear ?? this.birthYear,
-      age: age ?? this.age,
-      goal: goal ?? this.goal,
-      activityLevel: activityLevel ?? this.activityLevel,
+      primaryGoal: primaryGoal ?? this.primaryGoal,
+      workoutFrequency: workoutFrequency ?? this.workoutFrequency,
       weeklyGoal: weeklyGoal ?? this.weeklyGoal,
-      dailyCalorieTarget: dailyCalorieTarget ?? this.dailyCalorieTarget,
-      dailyProteinTarget: dailyProteinTarget ?? this.dailyProteinTarget,
-      dailyCarbsTarget: dailyCarbsTarget ?? this.dailyCarbsTarget,
-      dailyFatTarget: dailyFatTarget ?? this.dailyFatTarget,
-      dailyWaterTarget: dailyWaterTarget ?? this.dailyWaterTarget,
+      dailyCalories: dailyCalories ?? this.dailyCalories,
+      proteinGoal: proteinGoal ?? this.proteinGoal,
+      carbsGoal: carbsGoal ?? this.carbsGoal,
+      fatGoal: fatGoal ?? this.fatGoal,
+      waterGoal: waterGoal ?? this.waterGoal,
+      createdAt: createdAt ?? this.createdAt,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
     );
   }
 }

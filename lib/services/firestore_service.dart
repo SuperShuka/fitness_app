@@ -1,22 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_profile.dart';
+import 'nutrition_service.dart';
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Collection references
   final CollectionReference _usersCollection =
   FirebaseFirestore.instance.collection('users');
 
-  // Get current user ID
-  String? get currentUserId => _auth.currentUser?.uid;
-
   // Save user profile to Firestore
-  Future<void> saveUserProfile(UserProfile profile) async {
+  Future<void> saveUserProfile(UserProfile userProfile) async {
     try {
-      await _usersCollection.doc(profile.uid).set(profile.toMap());
+      await _usersCollection
+          .doc(userProfile.userId)
+          .set(userProfile.toMap(), SetOptions(merge: true));
+
+      print('User profile saved successfully');
     } catch (e) {
       print('Error saving user profile: $e');
       throw e;
@@ -24,12 +24,14 @@ class FirestoreService {
   }
 
   // Get user profile from Firestore
-  Future<UserProfile?> getUserProfile(String uid) async {
+  Future<UserProfile?> getUserProfile(String userId) async {
     try {
-      DocumentSnapshot doc = await _usersCollection.doc(uid).get();
-      if (doc.exists) {
-        return UserProfile.fromDocument(doc);
+      DocumentSnapshot doc = await _usersCollection.doc(userId).get();
+
+      if (doc.exists && doc.data() != null) {
+        return UserProfile.fromMap(doc.data() as Map<String, dynamic>);
       }
+
       return null;
     } catch (e) {
       print('Error getting user profile: $e');
@@ -37,75 +39,80 @@ class FirestoreService {
     }
   }
 
-  // Calculate nutrition targets based on user profile
-  Future<UserProfile> calculateNutritionTargets(UserProfile profile) async {
-    // Calculate age from birth year
-    int currentYear = DateTime.now().year;
-    int age = currentYear - int.parse(profile.birthYear ?? '2000');
-
-    // Base metabolic rate (BMR) using Mifflin-St Jeor Equation
-    double bmr;
-    if (profile.gender == 'male') {
-      bmr = 10 * profile.weight + 6.25 * profile.height - 5 * age + 5;
-    } else {
-      bmr = 10 * profile.weight + 6.25 * profile.height - 5 * age - 161;
-    }
-
-    // Activity factor
-    double activityFactor;
-    switch (profile.activityLevel) {
-      case 'beginner':
-        activityFactor = 1.2; // Sedentary
-        break;
-      case 'intermediate':
-        activityFactor = 1.55; // Moderate activity
-        break;
-      case 'advanced':
-        activityFactor = 1.725; // Very active
-        break;
-      default:
-        activityFactor = 1.2;
-    }
-
-    // Total Daily Energy Expenditure (TDEE)
-    double tdee = bmr * activityFactor;
-
-    // Adjust calories based on goal
-    int dailyCalories;
-    switch (profile.goal) {
-      case 'lose_weight':
-        dailyCalories = (tdee - 500).round(); // 500 calorie deficit
-        break;
-      case 'gain_weight':
-        dailyCalories = (tdee + 500).round(); // 500 calorie surplus
-        break;
-      default: // maintain_weight
-        dailyCalories = tdee.round();
-    }
-
-    int dailyProtein = (profile.weight * 2).round();
-    int dailyFat = ((dailyCalories * 0.25) / 9).round();
-    int dailyCarbsCals = dailyCalories - (dailyProtein * 4) - (dailyFat * 9);
-    int dailyCarbs = (dailyCarbsCals / 4).round();
-
-    int dailyWater = (profile.weight * 30).round();
-
-    return profile.copyWith(
-      age: age,
-      dailyCalorieTarget: dailyCalories,
-      dailyProteinTarget: dailyProtein,
-      dailyCarbsTarget: dailyCarbs,
-      dailyFatTarget: dailyFat,
-      dailyWaterTarget: dailyWater,
-    );
-  }
-
-  // Update user profile in Firestore
-  Future<void> updateUserProfile(UserProfile profile) async {
+  // Update specific fields in user profile
+  Future<void> updateUserProfile(String userId, Map<String, dynamic> data) async {
     try {
-      await _usersCollection.doc(profile.uid).update(profile.toMap());
+      // Add lastUpdated timestamp
+      data['lastUpdated'] = DateTime.now();
+
+      await _usersCollection
+          .doc(userId)
+          .update(data);
+
+      print('User profile updated successfully');
     } catch (e) {
       print('Error updating user profile: $e');
+      throw e;
+    }
+  }
+
+  // Update user weight and recalculate nutritional needs
+  Future<void> updateUserWeight(String userId, double newWeight) async {
+    try {
+      // Get current user profile
+      UserProfile? currentProfile = await getUserProfile(userId);
+
+      if (currentProfile != null) {
+        // Create nutrition service
+        final nutritionService = NutritionService();
+
+        // Calculate age
+        final currentYear = DateTime.now().year;
+        final age = currentYear - int.parse(currentProfile.birthYear);
+
+        // Calculate new daily calorie needs
+        final dailyCalories = nutritionService.calculateDailyCalories(
+          gender: currentProfile.gender,
+          age: age,
+          height: currentProfile.height,
+          weight: newWeight,
+          activityLevel: currentProfile.workoutFrequency,
+          goal: currentProfile.primaryGoal,
+        );
+
+        // Calculate new macro distribution
+        final macros = nutritionService.calculateMacroDistribution(
+          calories: dailyCalories,
+          goal: currentProfile.primaryGoal,
+        );
+
+        // Update user profile with new weight and nutritional needs
+        await _usersCollection.doc(userId).update({
+          'weight': newWeight,
+          'dailyCalories': dailyCalories,
+          'proteinGoal': macros['protein'],
+          'carbsGoal': macros['carbs'],
+          'fatGoal': macros['fat'],
+          'lastUpdated': DateTime.now(),
+        });
+
+        print('User weight updated and nutritional needs recalculated');
+      } else {
+        throw Exception('User profile not found');
+      }
+    } catch (e) {
+      print('Error updating user weight: $e');
+      throw e;
+    }
+  }
+
+  // Delete user profile
+  Future<void> deleteUserProfile(String userId) async {
+    try {
+      await _usersCollection.doc(userId).delete();
+      print('User profile deleted successfully');
+    } catch (e) {
+      print('Error deleting user profile: $e');
       throw e;
     }
   }

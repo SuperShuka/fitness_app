@@ -1,72 +1,62 @@
-import 'food_item.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Meal {
   final String id;
   final String userId;
   final String name;
-  final DateTime date;
-  final List<MealEntry> entries;
+  final String? imageUrl;
+  final int calories;
+  final int protein;
+  final int carbs;
+  final int fat;
+  final String date;
+  final Timestamp timestamp;
 
   Meal({
     required this.id,
     required this.userId,
     required this.name,
+    this.imageUrl,
+    required this.calories,
+    required this.protein,
+    required this.carbs,
+    required this.fat,
     required this.date,
-    required this.entries,
+    required this.timestamp,
   });
-
-  double get totalCalories => entries.fold(0, (sum, entry) => sum + (entry.foodItem.calories * entry.servingSize));
-  double get totalProtein => entries.fold(0, (sum, entry) => sum + (entry.foodItem.protein * entry.servingSize));
-  double get totalCarbs => entries.fold(0, (sum, entry) => sum + (entry.foodItem.carbs * entry.servingSize));
-  double get totalFat => entries.fold(0, (sum, entry) => sum + (entry.foodItem.fat * entry.servingSize));
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'userId': userId,
       'name': name,
-      'date': date.toIso8601String(),
-      'entries': entries.map((entry) => entry.toMap()).toList(),
+      'imageUrl': imageUrl,
+      'calories': calories,
+      'protein': protein,
+      'carbs': carbs,
+      'fat': fat,
+      'date': date,
+      'timestamp': timestamp,
     };
   }
 
-  factory Meal.fromMap(Map<String, dynamic> map) {
+  factory Meal.fromMap(Map<String, dynamic> map, String documentId) {
     return Meal(
-      id: map['id'],
-      userId: map['userId'],
-      name: map['name'],
-      date: DateTime.parse(map['date']),
-      entries: List<MealEntry>.from(
-        map['entries']?.map((entry) => MealEntry.fromMap(entry)) ?? [],
-      ),
+      id: documentId,
+      userId: map['userId'] ?? '',
+      name: map['name'] ?? '',
+      imageUrl: map['imageUrl'],
+      calories: map['calories'] ?? 0,
+      protein: map['protein'] ?? 0,
+      carbs: map['carbs'] ?? 0,
+      fat: map['fat'] ?? 0,
+      date: map['date'] ?? '',
+      timestamp: map['timestamp'] ?? Timestamp.now(),
     );
   }
-}
 
-class MealEntry {
-  final FoodItem foodItem;
-  final double servingSize;
-  final String? notes;
-
-  MealEntry({
-    required this.foodItem,
-    this.servingSize = 1.0,
-    this.notes,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'foodItem': foodItem.toMap(),
-      'servingSize': servingSize,
-      'notes': notes,
-    };
-  }
-
-  factory MealEntry.fromMap(Map<String, dynamic> map) {
-    return MealEntry(
-      foodItem: FoodItem.fromMap(map['foodItem']),
-      servingSize: map['servingSize'] ?? 1.0,
-      notes: map['notes'],
-    );
+  factory Meal.fromDocument(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return Meal.fromMap(data, doc.id);
   }
 }
