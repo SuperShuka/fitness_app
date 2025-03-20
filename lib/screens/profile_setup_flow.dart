@@ -7,7 +7,6 @@ import 'package:fitness_app/services/firestore_service.dart';
 import 'main_screen.dart';
 import 'package:lottie/lottie.dart';
 
-// App theme colors
 class AppColors {
   static const Color primary = Color(0xFF000000);
   static const Color secondary = Color(0xFF4A90E2);
@@ -85,7 +84,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
   void _nextStep() {
     if (!_currentPageHasSelection) {
-      // Provide haptic feedback and visual indication that a selection is required
+
       HapticFeedback.mediumImpact();
       _animationController.forward().then((_) =>
           _animationController.reverse());
@@ -132,7 +131,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
           ),
           child: Column(
             children: [
-              // Custom app bar
+
               Padding(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 12),
@@ -155,7 +154,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                 ),
               ),
 
-              // Main content
               Expanded(
                 child: PageView(
                   controller: _pageController,
@@ -174,7 +172,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                 ),
               ),
 
-              // Bottom navigation
               AnimatedBuilder(
                 animation: _animationController,
                 builder: (context, child) {
@@ -603,11 +600,11 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
   }
 
   Widget _buildBirthYearStep() {
-    // Current year
+
     final int currentYear = DateTime
         .now()
         .year;
-    // Create a list of years from (currentYear - 80) to (currentYear - 14)
+
     final List<int> years = List.generate(
       67,
           (index) => currentYear - 14 - index,
@@ -653,7 +650,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Center highlight for selected year
+
                   Positioned(
                     top: (MediaQuery
                         .of(context)
@@ -713,16 +710,14 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
   }
 
   Widget _buildHeightStep() {
-    // Set height ranges based on unit system
-    final double minHeight = _useMetric ? 140.0; // 55 inches = ~4'7"
-    final double maxHeight = _useMetric ? 220.0 : 87.0; // 87 inches = 7'3"
+
+    final double minHeight = _useMetric ? 140.0;
+    final double maxHeight = _useMetric ? 220.0 : 87.0;
     final int divisions = _useMetric ? 80 : 32;
 
-    // Ensure height is within valid range for current unit system
     if (_height < minHeight) _height = minHeight;
     if (_height > maxHeight) _height = maxHeight;
 
-    // Height display format and unit text
     String displayHeight;
     String unitText;
 
@@ -730,14 +725,13 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
       displayHeight = '${_height.toInt()}';
       unitText = 'cm';
     } else {
-      // Convert height to feet and inches display
+
       int feet = (_height / 12).floor();
       int inches = (_height % 12).round();
       displayHeight = '$feet\'$inches\"';
       unitText = '';
     }
 
-    // Calculate position for person icon on height visualization
     double personPosition = 180 - (((_height - minHeight) / (maxHeight - minHeight)) * 180);
 
     return Padding(
@@ -765,7 +759,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
           ),
           const SizedBox(height: 40),
 
-          // Height display - Modern design
           Center(
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 40),
@@ -817,18 +810,17 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
           const SizedBox(height: 60),
 
-          // Custom height visualization with slider
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Left side - visualization
+
               SizedBox(
                 width: 100,
                 height: 220,
                 child: Stack(
                   alignment: Alignment.bottomCenter,
                   children: [
-                    // Height visualization bar
+
                     Container(
                       width: 24,
                       height: 180,
@@ -852,7 +844,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                       ),
                     ),
 
-                    // Height markers
                     ...List.generate(6, (index) {
                       return Positioned(
                         left: 30,
@@ -869,7 +860,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                       );
                     }),
 
-                    // Person icon with indicator line
                     Positioned(
                       bottom: personPosition.clamp(0.0, 180.0),
                       child: Row(
@@ -908,7 +898,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
               const SizedBox(width: 40),
 
-              // Right side - vertical slider
               SliderTheme(
                 data: SliderThemeData(
                   trackHeight: 8,
@@ -951,7 +940,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
           const SizedBox(height: 40),
 
-          // Fine tune controls for height
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -959,8 +947,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                 if (_height > minHeight) {
                   setState(() {
                     _height = _useMetric
-                        ? _height - 1.0  // Decrement by 1 cm
-                        : _height - 0.5; // Decrement by 0.5 inch
+                        ? _height - 1.0
+                        : _height - 0.5;
                   });
                   HapticFeedback.lightImpact();
                 }
@@ -985,8 +973,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                 if (_height < maxHeight) {
                   setState(() {
                     _height = _useMetric
-                        ? _height + 1.0  // Increment by 1 cm
-                        : _height + 0.5; // Increment by 0.5 inch
+                        ? _height + 1.0
+                        : _height + 0.5;
                   });
                   HapticFeedback.lightImpact();
                 }
@@ -996,7 +984,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
           const SizedBox(height: 30),
 
-          // Height range indicators
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Row(
@@ -1028,7 +1015,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
     );
   }
 
-// Helper widget for height/weight adjustment buttons - same as in weight step
   Widget _buildAdjustButton(IconData icon, VoidCallback onPressed) {
     return InkWell(
       onTap: onPressed,
@@ -1057,19 +1043,16 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
   }
 
   Widget _buildWeightStep() {
-    // Set weight ranges based on unit system
+
     final double minWeight = _useMetric ? 30.0 : 66.0;
     final double maxWeight = _useMetric ? 150.0 : 330.0;
     final int divisions = _useMetric ? 120 : 264;
 
-    // Ensure weight is within valid range for current unit system
     if (_weight < minWeight) _weight = minWeight;
     if (_weight > maxWeight) _weight = maxWeight;
 
-    // Weight display format
     String displayWeight = '${_weight.toInt()}';
 
-    // Unit text
     String unitText = _useMetric ? 'kg' : 'lb';
 
     return Padding(
@@ -1097,7 +1080,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
           ),
           const SizedBox(height: 40),
 
-          // Weight display - Modern design
           Center(
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 40),
@@ -1148,7 +1130,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
           const SizedBox(height: 60),
 
-          // Fine tune controls
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -1189,7 +1170,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
           const SizedBox(height: 40),
 
-          // Weight slider - Enhanced design
           SliderTheme(
             data: SliderThemeData(
               trackHeight: 8,
@@ -1204,7 +1184,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 28),
             ),
             child: Slider(
-              value: _weight.clamp(minWeight, maxWeight), // Ensure the value is in valid range
+              value: _weight.clamp(minWeight, maxWeight),
               min: minWeight,
               max: maxWeight,
               divisions: divisions,
@@ -1221,7 +1201,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
           const SizedBox(height: 30),
 
-          // Weight range indicators
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Row(
@@ -1247,14 +1226,12 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
           const SizedBox(height: 50),
 
-          // Helpful weight context
           _buildWeightContext(),
         ],
       ),
     );
   }
 
-// Helper widget for weight context information
   Widget _buildWeightContext() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1287,7 +1264,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
   }
 
   Widget _buildTargetWeightStep() {
-    // Skip this step if maintaining weight
+
     if (_primaryGoal == 'maintain_weight') {
       _targetWeight = _weight;
       return _buildWeeklyGoalStep();
@@ -1353,7 +1330,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
           ),
           SizedBox(height: 30),
 
-          // Weight comparison
           Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1455,7 +1431,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
             ),
           ),
 
-          // Unit toggle
           Center(
             child: Container(
               margin: EdgeInsets.only(top: 16),
@@ -1499,7 +1474,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
   }
 
   Widget _buildWeeklyGoalStep() {
-    // Determine the goal type text and color
+
     String goalTypeText = "";
     Color goalColor = AppColors.primary;
 
@@ -1571,7 +1546,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
           ),
           SizedBox(height: 40),
 
-          // Weekly goal visualization
           Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -1619,7 +1593,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
           SizedBox(height: 30),
 
-          // Custom segmented selector for weekly goal
           Container(
             padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -1637,7 +1610,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
             ),
           ),
 
-          // Slider for fine-tuning
           SliderTheme(
             data: SliderThemeData(
               trackHeight: 8,
@@ -1727,7 +1699,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Add Lottie animation
+
           Lottie.asset(
             'assets/animations/loading.json',
             width: 200,
@@ -1774,20 +1746,18 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
     });
 
     try {
-      // Get current user
+
       User? currentUser = FirebaseAuth.instance.currentUser;
 
       if (currentUser == null) {
         throw Exception("No authenticated user found");
       }
 
-      // Calculate age from birth year
       final currentYear = DateTime
           .now()
           .year;
       final age = currentYear - int.parse(_birthYear!);
 
-      // Calculate BMR and daily calorie needs using the NutritionService
       final nutritionService = NutritionService();
       final dailyCalories = nutritionService.calculateDailyCalories(
         gender: _gender!,
@@ -1798,13 +1768,11 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
         goal: _primaryGoal!,
       );
 
-      // Calculate macro distribution
       final macros = nutritionService.calculateMacroDistribution(
         calories: dailyCalories,
         goal: _primaryGoal!,
       );
 
-      // Create user profile object
       final userProfile = UserProfile(
         userId: currentUser.uid,
         email: currentUser.email ?? '',
@@ -1822,31 +1790,27 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
         carbsGoal: macros['carbs']!,
         fatGoal: macros['fat']!,
         waterGoal: 2000,
-        // Default water goal in ml
+
         createdAt: DateTime.now(),
         lastUpdated: DateTime.now(),
       );
 
-      // Save user profile to Firestore
       await _firestoreService.saveUserProfile(userProfile);
 
-      // Add a slight delay for better UX
       await Future.delayed(Duration(seconds: 2));
 
-      // Navigate to main screen
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => MainScreen(),
         ),
       );
     } catch (e) {
-      // Handle errors
+
       setState(() {
         _isLoading = false;
-        _currentStep = _totalSteps - 1; // Go back to the last input screen
+        _currentStep = _totalSteps - 1;
       });
 
-      // Show error snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error saving profile: ${e.toString()}'),
