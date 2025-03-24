@@ -22,7 +22,8 @@ class ProfileSetupFlow extends StatefulWidget {
   _ProfileSetupFlowState createState() => _ProfileSetupFlowState();
 }
 
-class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerProviderStateMixin {
+class _ProfileSetupFlowState extends State<ProfileSetupFlow>
+    with SingleTickerProviderStateMixin {
   final FirestoreService _firestoreService = FirestoreService();
   final PageController _pageController = PageController();
   late AnimationController _animationController;
@@ -79,10 +80,10 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
   void _nextStep() {
     if (!_currentPageHasSelection) {
-
       HapticFeedback.mediumImpact();
-      _animationController.forward().then((_) =>
-          _animationController.reverse());
+      _animationController
+          .forward()
+          .then((_) => _animationController.reverse());
       return;
     }
 
@@ -126,18 +127,17 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
           ),
           child: Column(
             children: [
-
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   children: [
                     _currentStep > 0
                         ? IconButton(
-                      icon: Icon(
-                          Icons.arrow_back_ios_new, color: AppColors.text),
-                      onPressed: _previousStep,
-                    )
+                            icon: Icon(Icons.arrow_back_ios_new,
+                                color: AppColors.text),
+                            onPressed: _previousStep,
+                          )
                         : SizedBox(width: 48),
                     Expanded(
                       child: Center(
@@ -148,7 +148,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                   ],
                 ),
               ),
-
               Expanded(
                 child: PageView(
                   controller: _pageController,
@@ -165,14 +164,17 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                   ],
                 ),
               ),
-
               AnimatedBuilder(
                 animation: _animationController,
                 builder: (context, child) {
                   return Transform.translate(
                     offset: Offset(
-                        _animationController.value * 10 * ((_animationController
-                            .value * 10).floor() % 2 == 0 ? 1 : -1), 0),
+                        _animationController.value *
+                            10 *
+                            ((_animationController.value * 10).floor() % 2 == 0
+                                ? 1
+                                : -1),
+                        0),
                     child: child,
                   );
                 },
@@ -182,8 +184,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                     onPressed: _nextStep,
                     child: Text(
                       _currentStep == _totalSteps - 1 ? 'Finish' : 'Continue',
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w600),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -213,8 +215,9 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
           width: index == _currentStep ? 16 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: index <= _currentStep ? AppColors.primary : Colors.grey
-                .shade300,
+            color: index <= _currentStep
+                ? AppColors.primary
+                : Colors.grey.shade300,
             borderRadius: BorderRadius.circular(4),
           ),
         );
@@ -269,12 +272,12 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
         ),
         boxShadow: isSelected
             ? [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.2),
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          )
-        ]
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                )
+              ]
             : [],
       ),
       child: InkWell(
@@ -347,29 +350,14 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
             ),
           ),
           SizedBox(height: 40),
-          _buildFrequencyOption(
-              'Beginner',
-              '0-2 workouts a week',
-              Icons.directions_walk,
-              '😌',
-              'beginner'
-          ),
+          _buildFrequencyOption('Beginner', '0-2 workouts a week',
+              Icons.directions_walk, '😌', 'beginner'),
           SizedBox(height: 20),
-          _buildFrequencyOption(
-              'Intermediate',
-              '3-5 workouts a week',
-              Icons.directions_run,
-              '💪',
-              'intermediate'
-          ),
+          _buildFrequencyOption('Intermediate', '3-5 workouts a week',
+              Icons.directions_run, '💪', 'intermediate'),
           SizedBox(height: 20),
-          _buildFrequencyOption(
-              'Advanced',
-              '6+ workouts a week',
-              Icons.fitness_center,
-              '🔥',
-              'advanced'
-          ),
+          _buildFrequencyOption('Advanced', '6+ workouts a week',
+              Icons.fitness_center, '🔥', 'advanced'),
         ],
       ),
     );
@@ -392,12 +380,12 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
         ),
         boxShadow: isSelected
             ? [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.2),
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          )
-        ]
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                )
+              ]
             : [],
       ),
       child: InkWell(
@@ -431,8 +419,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                     title,
                     style: TextStyle(
                       fontSize: 18,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight
-                          .w500,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w500,
                       color: isSelected ? AppColors.primary : AppColors.text,
                     ),
                   ),
@@ -568,10 +556,9 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
   // }
 
   Widget _buildHeightStep() {
-
     final double minHeight = 140.0;
-    final double maxHeight =  220.0;
-    final int divisions =  80;
+    final double maxHeight = 220.0;
+    final int divisions = 80;
 
     if (_height < minHeight) _height = minHeight;
     if (_height > maxHeight) _height = maxHeight;
@@ -579,10 +566,11 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
     String displayHeight;
     String unitText;
 
-      displayHeight = '${_height.toInt()}';
-      unitText = 'cm';
+    displayHeight = '${_height.toInt()}';
+    unitText = 'cm';
 
-    double personPosition = 180 - (((_height - minHeight) / (maxHeight - minHeight)) * 180);
+    double personPosition =
+        180 - (((_height - minHeight) / (maxHeight - minHeight)) * 180);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -608,7 +596,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
             ),
           ),
           const SizedBox(height: 40),
-
           Center(
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 40),
@@ -657,20 +644,16 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
               ),
             ),
           ),
-
           const SizedBox(height: 60),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-
               SizedBox(
                 width: 100,
                 height: 220,
                 child: Stack(
                   alignment: Alignment.bottomCenter,
                   children: [
-
                     Container(
                       width: 24,
                       height: 180,
@@ -693,12 +676,12 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                         ],
                       ),
                     ),
-
                     ...List.generate(6, (index) {
                       return Positioned(
                         left: 30,
                         bottom: (180 / 5) * index,
-                        child: Text('${(minHeight + ((maxHeight - minHeight) / 5) * (5 - index)).toInt()}',
+                        child: Text(
+                          '${(minHeight + ((maxHeight - minHeight) / 5) * (5 - index)).toInt()}',
                           style: TextStyle(
                             fontSize: 10,
                             color: AppColors.textLight,
@@ -706,7 +689,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                         ),
                       );
                     }),
-
                     Positioned(
                       bottom: personPosition.clamp(0.0, 180.0),
                       child: Row(
@@ -742,9 +724,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                   ],
                 ),
               ),
-
               const SizedBox(width: 40),
-
               SliderTheme(
                 data: SliderThemeData(
                   trackHeight: 8,
@@ -756,7 +736,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                     elevation: 6,
                   ),
                   overlayColor: AppColors.primary.withOpacity(0.2),
-                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 28),
+                  overlayShape:
+                      const RoundSliderOverlayShape(overlayRadius: 28),
                 ),
                 child: SizedBox(
                   height: 220,
@@ -784,9 +765,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
               ),
             ],
           ),
-
           const SizedBox(height: 40),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -824,21 +803,21 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
               }),
             ],
           ),
-
           const SizedBox(height: 30),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('${minHeight.toInt()} cm',
+                Text(
+                  '${minHeight.toInt()} cm',
                   style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 14,
                   ),
                 ),
-                Text('${maxHeight.toInt()} cm',
+                Text(
+                  '${maxHeight.toInt()} cm',
                   style: TextStyle(
                     color: AppColors.textLight,
                     fontSize: 14,
@@ -1082,7 +1061,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 24),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       borderRadius: BorderRadius.circular(24),
@@ -1159,7 +1139,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
           Expanded(
             child: Text(
               "Weight data helps us personalize your calorie goals. "
-                  "You'll be able to track your progress over time.",
+              "You'll be able to track your progress over time.",
               style: TextStyle(
                 color: AppColors.textLight,
                 fontSize: 15,
@@ -1633,9 +1613,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
               divisions: maxAge - minAge,
               onChanged: (value) {
                 setState(() {
-                  _age = value.toInt()
-
-                  ;
+                  _age = value.toInt();
                 });
                 HapticFeedback.selectionClick();
               },
@@ -1724,18 +1702,9 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
     Color goalColor = AppColors.primary;
 
     // Determine goal type and color
-    if (_primaryGoal == 'lose_weight') {
-      goalTypeText = "Weekly weight loss";
-      goalColor = Color(0xFFFF5C5C); // Vibrant red
-    } else if (_primaryGoal == 'gain_weight') {
-      goalTypeText = "Weekly weight gain";
-      goalColor = Color(0xFF4CAF50); // Rich green
-    } else {
-      goalTypeText = "Weekly activity goal";
-      goalColor = Color(0xFF2196F3); // Bright blue
-    }
+    goalTypeText = "Weekly activity goal";
+    goalColor = Color(0xFF2196F3); // Bright blue
 
-    // Map of goal options with corresponding emoji and description texts
     final goalOptions = [
       {
         'value': 0.1,
@@ -1786,9 +1755,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                   color: Colors.black87,
                 ),
               ),
-
               SizedBox(height: 16),
-
               Container(
                 decoration: BoxDecoration(
                   color: goalColor.withOpacity(0.1),
@@ -1804,9 +1771,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                   ),
                 ),
               ),
-
               SizedBox(height: 32),
-
               Expanded(
                 child: ListView.builder(
                   itemCount: goalOptions.length,
@@ -1814,7 +1779,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                   physics: BouncingScrollPhysics(),
                   itemBuilder: (context, index) {
                     final option = goalOptions[index];
-                    final isSelected = (_weeklyGoal * 10).round() == ((option['value'] as double) * 10).round();
+                    final isSelected = (_weeklyGoal * 10).round() ==
+                        ((option['value'] as double) * 10).round();
 
                     return GestureDetector(
                       onTap: () {
@@ -1840,7 +1806,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                         child: Row(
                           children: [
                             Text(
@@ -1857,7 +1824,9 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color: isSelected ? goalColor : Colors.black87,
+                                      color: isSelected
+                                          ? goalColor
+                                          : Colors.black87,
                                     ),
                                   ),
                                   SizedBox(height: 4),
@@ -1872,7 +1841,9 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                               ),
                             ),
                             Icon(
-                              isSelected ? Icons.check_circle : Icons.circle_outlined,
+                              isSelected
+                                  ? Icons.check_circle
+                                  : Icons.circle_outlined,
                               color: isSelected ? goalColor : Colors.grey,
                               size: 24,
                             ),
@@ -1896,7 +1867,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-
           Lottie.asset(
             'assets/animations/loading.json',
             width: 200,
@@ -1943,13 +1913,11 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
     });
 
     try {
-
       User? currentUser = FirebaseAuth.instance.currentUser;
 
       if (currentUser == null) {
         throw Exception("No authenticated user found");
       }
-
       final age = _age;
 
       final nutritionService = NutritionService();
@@ -1959,12 +1927,10 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
         height: _height,
         weight: _weight,
         activityLevel: _workoutFrequency!,
-        goal: _primaryGoal!,
       );
 
       final macros = nutritionService.calculateMacroDistribution(
         calories: dailyCalories,
-        goal: _primaryGoal!,
       );
 
       final userProfile = UserProfile(
@@ -1976,7 +1942,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
         height: _height,
         weight: _weight,
         targetWeight: _targetWeight,
-        primaryGoal: _primaryGoal!,
+        primaryGoal: "lose_weight",
         workoutFrequency: _workoutFrequency!,
         weeklyGoal: _weeklyGoal,
         dailyCalories: dailyCalories,
@@ -1984,7 +1950,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
         carbsGoal: macros['carbs']!,
         fatGoal: macros['fat']!,
         waterGoal: 2000,
-
         createdAt: DateTime.now(),
         lastUpdated: DateTime.now(),
       );
@@ -1999,7 +1964,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
         ),
       );
     } catch (e) {
-
       setState(() {
         _isLoading = false;
         _currentStep = _totalSteps - 1;

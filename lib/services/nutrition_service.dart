@@ -28,13 +28,13 @@ class NutritionService {
         required int age,
         required double height,
         required double weight,
-        required String activityLevel,
-        required String goal}) {
+        required String activityLevel,}) {
 
     // Calculate BMR and TDEE
     double bmr = calculateBMR(gender, age, height, weight);
     double tdee = calculateTDEE(bmr, activityLevel);
 
+    String goal = "lose_weight";
     // Adjust calories based on goal
     switch (goal.toLowerCase()) {
       case 'lose_weight':
@@ -50,12 +50,12 @@ class NutritionService {
   // Calculate macro distribution based on calorie needs and goal
   Map<String, int> calculateMacroDistribution({
     required int calories,
-    required String goal
   }) {
     // Default protein requirement: 1.8g per kg of body weight
     double proteinPercentage;
     double fatPercentage;
     double carbsPercentage;
+    String goal = "lose_weight";
 
     switch (goal.toLowerCase()) {
       case 'lose_weight':

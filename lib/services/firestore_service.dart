@@ -73,13 +73,11 @@ class FirestoreService {
           height: currentProfile.height,
           weight: newWeight,
           activityLevel: currentProfile.workoutFrequency,
-          goal: currentProfile.primaryGoal,
         );
 
         // Calculate new macro distribution
         final macros = nutritionService.calculateMacroDistribution(
           calories: dailyCalories,
-          goal: currentProfile.primaryGoal,
         );
 
         // Update user profile with new weight and nutritional needs
