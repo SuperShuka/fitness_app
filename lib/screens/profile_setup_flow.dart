@@ -30,9 +30,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
   int _totalSteps = 8;
 
   String? _gender;
-  String? _primaryGoal;
   String? _workoutFrequency;
-  String? _birthYear;
+  int _age = 20;
   double _height = 177;
   double _weight = 60;
   double _targetWeight = 60;
@@ -42,19 +41,15 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
   bool get _currentPageHasSelection {
     switch (_currentStep) {
       case 0:
-        return true;
-      case 1:
         return _gender != null;
-      case 2:
-        return _primaryGoal != null;
-      case 3:
+      case 1:
         return _workoutFrequency != null;
+      case 2:
+        return _age != null;
+      case 3:
       case 4:
-        return _birthYear != null;
       case 5:
       case 6:
-      case 7:
-      case 8:
         return true;
       default:
         return false;
@@ -160,9 +155,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                   physics: NeverScrollableScrollPhysics(),
                   children: [
                     _buildGenderStep(),
-                    _buildPrimaryGoalStep(),
                     _buildWorkoutFrequencyStep(),
-                    _buildBirthYearStep(),
+                    _buildAgeStep(),
                     _buildHeightStep(),
                     _buildWeightStep(),
                     _buildTargetWeightStep(),
@@ -328,142 +322,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
     );
   }
 
-  Widget _buildPrimaryGoalStep() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 40),
-          Text(
-            "Your fitness journey",
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: AppColors.text,
-            ),
-          ),
-          SizedBox(height: 16),
-          Text(
-            "What's your primary goal?",
-            style: TextStyle(
-              fontSize: 20,
-              color: AppColors.textLight,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(height: 40),
-          _buildGoalOption(
-              'Lose Weight', Icons.trending_down, '🔥', 'lose_weight'),
-          SizedBox(height: 20),
-          _buildGoalOption(
-              'Maintain Weight', Icons.balance, '⚖️', 'maintain_weight'),
-          SizedBox(height: 20),
-          _buildGoalOption(
-              'Gain Weight', Icons.trending_up, '💪', 'gain_weight'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGoalOption(String title, IconData icon, String emoji,
-      String value) {
-    final isSelected = _primaryGoal == value;
-
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      decoration: BoxDecoration(
-        color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isSelected ? AppColors.primary : Colors.grey.shade300,
-          width: isSelected ? 2 : 1,
-        ),
-        boxShadow: isSelected
-            ? [
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.2),
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          )
-        ]
-            : [],
-      ),
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            _primaryGoal = value;
-          });
-          HapticFeedback.lightImpact();
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : Colors.grey.shade100,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                size: 24,
-                color: isSelected ? Colors.white : Colors.grey,
-              ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight
-                          .w500,
-                      color: isSelected ? AppColors.primary : AppColors.text,
-                    ),
-                  ),
-                  if (isSelected)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
-                      child: Text(
-                        _getGoalDescription(value),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textLight,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Text(
-              emoji,
-              style: TextStyle(fontSize: 24),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _getGoalDescription(String goal) {
-    switch (goal) {
-      case 'lose_weight':
-        return "We'll help you burn calories and track progress";
-      case 'maintain_weight':
-        return "We'll help you balance nutrition and fitness";
-      case 'gain_weight':
-        return "We'll help you build muscle and strength";
-      default:
-        return "";
-    }
-  }
-
   Widget _buildWorkoutFrequencyStep() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -599,115 +457,115 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
     );
   }
 
-  Widget _buildBirthYearStep() {
-
-    final int currentYear = DateTime
-        .now()
-        .year;
-
-    final List<int> years = List.generate(
-      67,
-          (index) => currentYear - 14 - index,
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 40),
-          Text(
-            "About you",
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: AppColors.text,
-            ),
-          ),
-          SizedBox(height: 16),
-          Text(
-            "What is your birth year?",
-            style: TextStyle(
-              fontSize: 20,
-              color: AppColors.textLight,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(height: 40),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-
-                  Positioned(
-                    top: (MediaQuery
-                        .of(context)
-                        .size
-                        .height / 2) - 100,
-                    child: Container(
-                      height: 60,
-                      width: MediaQuery
-                          .of(context)
-                          .size
-                          .width - 48,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                  ListWheelScrollView.useDelegate(
-                    itemExtent: 60,
-                    perspective: 0.005,
-                    diameterRatio: 1.5,
-                    physics: FixedExtentScrollPhysics(),
-                    onSelectedItemChanged: (index) {
-                      setState(() {
-                        _birthYear = years[index].toString();
-                      });
-                      HapticFeedback.selectionClick();
-                    },
-                    childDelegate: ListWheelChildBuilderDelegate(
-                      builder: (context, index) {
-                        final year = years[index];
-                        final isSelected = _birthYear == year.toString();
-                        return Center(
-                          child: Text(
-                            year.toString(),
-                            style: TextStyle(
-                              fontSize: isSelected ? 24 : 20,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.w500,
-                              color: isSelected ? AppColors.primary : AppColors
-                                  .textLight,
-                            ),
-                          ),
-                        );
-                      },
-                      childCount: years.length,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildBirthYearStep() {
+  //
+  //   final int currentYear = DateTime
+  //       .now()
+  //       .year;
+  //
+  //   final List<int> years = List.generate(
+  //     67,
+  //         (index) => currentYear - 14 - index,
+  //   );
+  //
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 24.0),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         SizedBox(height: 40),
+  //         Text(
+  //           "About you",
+  //           style: TextStyle(
+  //             fontSize: 30,
+  //             fontWeight: FontWeight.bold,
+  //             color: AppColors.text,
+  //           ),
+  //         ),
+  //         SizedBox(height: 16),
+  //         Text(
+  //           "What is your birth year?",
+  //           style: TextStyle(
+  //             fontSize: 20,
+  //             color: AppColors.textLight,
+  //             fontWeight: FontWeight.w500,
+  //           ),
+  //         ),
+  //         SizedBox(height: 40),
+  //         Expanded(
+  //           child: Container(
+  //             decoration: BoxDecoration(
+  //               color: Colors.white,
+  //               borderRadius: BorderRadius.circular(16),
+  //               boxShadow: [
+  //                 BoxShadow(
+  //                   color: Colors.grey.withOpacity(0.1),
+  //                   blurRadius: 10,
+  //                   offset: Offset(0, 4),
+  //                 ),
+  //               ],
+  //             ),
+  //             child: Stack(
+  //               alignment: Alignment.center,
+  //               children: [
+  //
+  //                 Positioned(
+  //                   top: (MediaQuery
+  //                       .of(context)
+  //                       .size
+  //                       .height / 2) - 100,
+  //                   child: Container(
+  //                     height: 60,
+  //                     width: MediaQuery
+  //                         .of(context)
+  //                         .size
+  //                         .width - 48,
+  //                     decoration: BoxDecoration(
+  //                       color: AppColors.primary.withOpacity(0.1),
+  //                       borderRadius: BorderRadius.circular(8),
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 ListWheelScrollView.useDelegate(
+  //                   itemExtent: 60,
+  //                   perspective: 0.005,
+  //                   diameterRatio: 1.5,
+  //                   physics: FixedExtentScrollPhysics(),
+  //                   onSelectedItemChanged: (index) {
+  //                     setState(() {
+  //                       _age = years[index].toString();
+  //                     });
+  //                     HapticFeedback.selectionClick();
+  //                   },
+  //                   childDelegate: ListWheelChildBuilderDelegate(
+  //                     builder: (context, index) {
+  //                       final year = years[index];
+  //                       final isSelected = _age == year.toString();
+  //                       return Center(
+  //                         child: Text(
+  //                           year.toString(),
+  //                           style: TextStyle(
+  //                             fontSize: isSelected ? 24 : 20,
+  //                             fontWeight: isSelected
+  //                                 ? FontWeight.bold
+  //                                 : FontWeight.w500,
+  //                             color: isSelected ? AppColors.primary : AppColors
+  //                                 .textLight,
+  //                           ),
+  //                         ),
+  //                       );
+  //                     },
+  //                     childCount: years.length,
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildHeightStep() {
 
@@ -994,44 +852,43 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
     );
   }
 
-  Widget _buildAdjustButton(IconData icon, VoidCallback onPressed) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade300,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Icon(
-          icon,
-          color: AppColors.primary,
-          size: 24,
-        ),
-      ),
-    );
-  }
+  // Widget _buildAdjustButton(IconData icon, VoidCallback onPressed) {
+  //   return InkWell(
+  //     onTap: onPressed,
+  //     borderRadius: BorderRadius.circular(20),
+  //     child: Container(
+  //       width: 40,
+  //       height: 40,
+  //       decoration: BoxDecoration(
+  //         color: Colors.white,
+  //         borderRadius: BorderRadius.circular(20),
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: Colors.grey.shade300,
+  //             blurRadius: 8,
+  //             offset: const Offset(0, 2),
+  //           ),
+  //         ],
+  //       ),
+  //       child: Icon(
+  //         icon,
+  //         color: AppColors.primary,
+  //         size: 24,
+  //       ),
+  //     ),
+  //   );
+  // }
 
+  // Weight Selection Step
   Widget _buildWeightStep() {
-
-    final double minWeight = 30.0;
-    final double maxWeight = 150.0;
-    final int divisions = 120;
+    final double minWeight = 40.0;
+    final double maxWeight = 130.0;
+    final int divisions = 90;
 
     if (_weight < minWeight) _weight = minWeight;
     if (_weight > maxWeight) _weight = maxWeight;
 
     String displayWeight = '${_weight.toInt()}';
-
     String unitText = 'kg';
 
     return Padding(
@@ -1041,11 +898,12 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
         children: [
           const SizedBox(height: 40),
           Text(
-            "Body measurements",
+            "Body Profile",
             style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
+              fontSize: 34,
+              fontWeight: FontWeight.w800,
               color: AppColors.text,
+              letterSpacing: -0.5,
             ),
           ),
           const SizedBox(height: 16),
@@ -1057,26 +915,28 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 50),
 
+          // Weight display card
           Center(
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 40),
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 40),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.primary.withOpacity(0.8),
+                    AppColors.primary.withOpacity(0.9),
                     AppColors.primary,
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(28),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
+                    color: AppColors.primary.withOpacity(0.25),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                    spreadRadius: 0,
                   ),
                 ],
               ),
@@ -1088,7 +948,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                   Text(
                     displayWeight,
                     style: const TextStyle(
-                      fontSize: 64,
+                      fontSize: 72,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -1097,7 +957,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                   Text(
                     unitText,
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 28,
                       fontWeight: FontWeight.w500,
                       color: Colors.white.withOpacity(0.9),
                     ),
@@ -1109,6 +969,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
           const SizedBox(height: 60),
 
+          // Weight adjustment buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -1132,7 +993,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                       Colors.orange.shade300,
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
               const SizedBox(width: 16),
@@ -1149,14 +1010,15 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
 
           const SizedBox(height: 40),
 
+          // Slider for weight selection
           SliderTheme(
             data: SliderThemeData(
-              trackHeight: 8,
+              trackHeight: 10,
               activeTrackColor: AppColors.primary,
               inactiveTrackColor: Colors.grey.shade200,
               thumbColor: Colors.white,
               thumbShape: const RoundSliderThumbShape(
-                enabledThumbRadius: 14,
+                enabledThumbRadius: 16,
                 elevation: 6,
               ),
               overlayColor: AppColors.primary.withOpacity(0.2),
@@ -1178,8 +1040,9 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
             ),
           ),
 
-          const SizedBox(height: 30),
+          const SizedBox(height: 18),
 
+          // Min/Max weight labels
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Row(
@@ -1189,51 +1052,118 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
                   '${minWeight.toInt()} $unitText',
                   style: TextStyle(
                     color: AppColors.textLight,
-                    fontSize: 14,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 Text(
                   '${maxWeight.toInt()} $unitText',
                   style: TextStyle(
                     color: AppColors.textLight,
-                    fontSize: 14,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 50),
+          const SizedBox(height: 40),
 
+          // Unit selector
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Text(
+                      'KG',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                    child: Text(
+                      'LB',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Info card
           _buildWeightContext(),
         ],
       ),
     );
   }
 
+// Weight context info card
   Widget _buildWeightContext() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.info_outline,
-            color: AppColors.primary,
-            size: 24,
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.info_outline,
+              color: AppColors.primary,
+              size: 24,
+            ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Text(
               "Weight data helps us personalize your calorie goals. "
                   "You'll be able to track your progress over time.",
               style: TextStyle(
                 color: AppColors.textLight,
-                fontSize: 14,
-                height: 1.4,
+                fontSize: 15,
+                height: 1.5,
               ),
             ),
           ),
@@ -1242,31 +1172,59 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
     );
   }
 
+  Widget _buildAdjustButton(IconData icon, VoidCallback onPressed) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            child: Icon(
+              icon,
+              size: 28,
+              color: AppColors.primary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildTargetWeightStep() {
-
-    if (_primaryGoal == 'maintain_weight') {
-      _targetWeight = _weight;
-      return _buildWeeklyGoalStep();
-    }
-
-    IconData trendIcon = Icons.trending_flat;
-    Color trendColor = Colors.green;
+    // Determine if losing or gaining weight
+    bool isLosing = _targetWeight < _weight;
+    IconData trendIcon = isLosing ? Icons.trending_down : Icons.trending_up;
+    Color trendColor = isLosing ? Colors.green.shade600 : Colors.blue.shade600;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 40),
+          const SizedBox(height: 40),
           Text(
-            "Your goal weight",
+            "Goal Setting",
             style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
+              fontSize: 34,
+              fontWeight: FontWeight.w800,
               color: AppColors.text,
+              letterSpacing: -0.5,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Text(
             "What weight would you like to reach?",
             style: TextStyle(
@@ -1275,124 +1233,167 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 40),
+          const SizedBox(height: 50),
+
+          // Target weight display
           Center(
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  colors: [
+                    trendColor.withOpacity(0.8),
+                    trendColor,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: trendColor.withOpacity(0.25),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
                 children: [
                   Text(
                     '${_targetWeight.toInt()}',
-                    style: TextStyle(
-                      fontSize: 60,
+                    style: const TextStyle(
+                      fontSize: 64,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                      color: Colors.white,
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
                     'kg',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.textLight,
+                      color: Colors.white.withOpacity(0.9),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          SizedBox(height: 30),
 
+          const SizedBox(height: 40),
+
+          // Current vs Target comparison
           Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      'Current',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppColors.textLight,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${_weight.toInt()} kg',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Icon(
-                    trendIcon,
-                    size: 32,
-                    color: trendColor,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade200,
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
                   ),
-                ),
-                Column(
-                  children: [
-                    Text(
-                      'Target',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: AppColors.textLight,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: trendColor.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${_targetWeight.toInt()} kg',
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        'Current',
                         style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: trendColor,
+                          fontSize: 16,
+                          color: AppColors.textLight,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${_weight.toInt()} kg',
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: trendColor.withOpacity(0.1),
+                      shape: BoxShape.circle,
                     ),
-                  ],
-                ),
-              ],
+                    child: Icon(
+                      trendIcon,
+                      size: 32,
+                      color: trendColor,
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      Text(
+                        'Target',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.textLight,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: trendColor.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${_targetWeight.toInt()} kg',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: trendColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
 
-          SizedBox(height: 40),
+          const SizedBox(height: 40),
+
+          // Target weight slider
           SliderTheme(
             data: SliderThemeData(
-              trackHeight: 8,
+              trackHeight: 10,
               activeTrackColor: trendColor,
-              inactiveTrackColor: Colors.grey.shade300,
+              inactiveTrackColor: Colors.grey.shade200,
               thumbColor: Colors.white,
-              thumbShape: RoundSliderThumbShape(
-                enabledThumbRadius: 12,
+              thumbShape: const RoundSliderThumbShape(
+                enabledThumbRadius: 16,
                 elevation: 4,
               ),
               overlayColor: trendColor.withOpacity(0.2),
-              overlayShape: RoundSliderOverlayShape(overlayRadius: 24),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 28),
             ),
             child: Slider(
               value: _targetWeight,
@@ -1410,41 +1411,307 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
             ),
           ),
 
+          const SizedBox(height: 18),
+
+          // Min/Max labels
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '40 kg',
+                  style: TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  '120 kg',
+                  style: TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Info card
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade200,
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: trendColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.tips_and_updates_outlined,
+                    color: trendColor,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    isLosing
+                        ? "Healthy weight loss is typically 0.5-1 kg per week. We'll help you set realistic goals."
+                        : "Healthy weight gain is typically 0.25-0.5 kg per week. We'll help you set realistic goals.",
+                    style: TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 15,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+// Add this additional method for age selection
+  Widget _buildAgeStep() {
+    int minAge = 13;
+    int maxAge = 80;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 40),
+          Text(
+            "About You",
+            style: TextStyle(
+              fontSize: 34,
+              fontWeight: FontWeight.w800,
+              color: AppColors.text,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "How old are you?",
+            style: TextStyle(
+              fontSize: 20,
+              color: AppColors.textLight,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 50),
+
+          // Age display
           Center(
             child: Container(
-              margin: EdgeInsets.only(top: 16),
+              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 40),
               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primary.withOpacity(0.9),
+                    AppColors.primary,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.25),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                    spreadRadius: 0,
+                  ),
+                ],
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'KG',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  Text(
+                    "${_age}",
+                    style: const TextStyle(
+                      fontSize: 72,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-                    child: Text(
-                      'LB',
-                      style: TextStyle(
-                        color: AppColors.text,
-                      ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "years",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white.withOpacity(0.9),
                     ),
                   ),
                 ],
               ),
+            ),
+          ),
+
+          const SizedBox(height: 60),
+
+          // Age adjustment buttons
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildAdjustButton(Icons.remove, () {
+                if (_age > minAge) {
+                  setState(() {
+                    _age--;
+                  });
+                  HapticFeedback.lightImpact();
+                }
+              }),
+              const SizedBox(width: 16),
+              Container(
+                width: 200,
+                height: 8,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.blue.shade300,
+                      AppColors.primary,
+                      Colors.orange.shade300,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              const SizedBox(width: 16),
+              _buildAdjustButton(Icons.add, () {
+                if (_age < maxAge) {
+                  setState(() {
+                    _age++;
+                  });
+                  HapticFeedback.lightImpact();
+                }
+              }),
+            ],
+          ),
+
+          const SizedBox(height: 40),
+
+          // Age slider
+          SliderTheme(
+            data: SliderThemeData(
+              trackHeight: 10,
+              activeTrackColor: AppColors.primary,
+              inactiveTrackColor: Colors.grey.shade200,
+              thumbColor: Colors.white,
+              thumbShape: const RoundSliderThumbShape(
+                enabledThumbRadius: 16,
+                elevation: 6,
+              ),
+              overlayColor: AppColors.primary.withOpacity(0.2),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 28),
+            ),
+            child: Slider(
+              value: _age.toDouble(),
+              min: minAge.toDouble(),
+              max: maxAge.toDouble(),
+              divisions: maxAge - minAge,
+              onChanged: (value) {
+                setState(() {
+                  _age = value.toInt()
+
+                  ;
+                });
+                HapticFeedback.selectionClick();
+              },
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // Min/Max age labels
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '$minAge yrs',
+                  style: TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  '$maxAge yrs',
+                  style: TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 40),
+
+          // Info card
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade200,
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.info_outline,
+                    color: AppColors.primary,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    "Your age helps us calculate your basal metabolic rate and daily calorie needs more accurately.",
+                    style: TextStyle(
+                      color: AppColors.textLight,
+                      fontSize: 15,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -1453,223 +1720,174 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
   }
 
   Widget _buildWeeklyGoalStep() {
-
     String goalTypeText = "";
     Color goalColor = AppColors.primary;
 
+    // Determine goal type and color
     if (_primaryGoal == 'lose_weight') {
       goalTypeText = "Weekly weight loss";
-      goalColor = Colors.red;
+      goalColor = Color(0xFFFF5C5C); // Vibrant red
     } else if (_primaryGoal == 'gain_weight') {
       goalTypeText = "Weekly weight gain";
-      goalColor = Colors.green;
+      goalColor = Color(0xFF4CAF50); // Rich green
     } else {
       goalTypeText = "Weekly activity goal";
-      goalColor = Colors.blue;
+      goalColor = Color(0xFF2196F3); // Bright blue
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 40),
-          Text(
-            "Set your pace",
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: AppColors.text,
-            ),
-          ),
-          SizedBox(height: 16),
-          Text(
-            goalTypeText,
-            style: TextStyle(
-              fontSize: 20,
-              color: AppColors.textLight,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(height: 40),
-          Center(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              decoration: BoxDecoration(
-                color: goalColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _weeklyGoal.toStringAsFixed(1),
-                    style: TextStyle(
-                      fontSize: 60,
-                      fontWeight: FontWeight.bold,
-                      color: goalColor,
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'kg/week',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textLight,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: 40),
+    // Map of goal options with corresponding emoji and description texts
+    final goalOptions = [
+      {
+        'value': 0.1,
+        'emoji': '🍐',
+        'text': 'Very gentle, slow progress',
+      },
+      {
+        'value': 0.5,
+        'emoji': '🍉',
+        'text': 'Moderate, balanced pace',
+      },
+      {
+        'value': 0.8,
+        'emoji': '🍎',
+        'text': 'Standard recommended pace',
+      },
+      {
+        'value': 1.0,
+        'emoji': '🥑',
+        'text': 'Ambitious, requires discipline',
+      },
+    ];
 
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
+    // Calculate estimated time to goal
+    int weeksToGoal = (_targetWeight - _weight).abs() ~/ _weeklyGoal;
+    String timeEstimate = "$weeksToGoal weeks";
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.white, Color(0xFFF9F9F2)],
+        ),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "How much weight do you\nwant to lose each week?",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  height: 1.2,
+                  color: Colors.black87,
                 ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: goalColor,
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'What this means',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.text,
-                      ),
-                    ),
-                  ],
+              ),
+
+              SizedBox(height: 16),
+
+              Container(
+                decoration: BoxDecoration(
+                  color: goalColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                SizedBox(height: 16),
-                Text(
-                  _getWeeklyGoalDescription(),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Text(
+                  "You will reach your goal in $timeEstimate",
                   style: TextStyle(
                     fontSize: 16,
-                    color: AppColors.textLight,
+                    fontWeight: FontWeight.w500,
+                    color: goalColor,
                   ),
                 ),
-              ],
-            ),
-          ),
-
-          SizedBox(height: 30),
-
-          Container(
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildWeeklyGoalOption(0.5, goalColor),
-                _buildWeeklyGoalOption(1.0, goalColor),
-                _buildWeeklyGoalOption(1.5, goalColor),
-                _buildWeeklyGoalOption(2.0, goalColor),
-              ],
-            ),
-          ),
-
-          SliderTheme(
-            data: SliderThemeData(
-              trackHeight: 8,
-              activeTrackColor: goalColor,
-              inactiveTrackColor: Colors.grey.shade300,
-              thumbColor: Colors.white,
-              thumbShape: RoundSliderThumbShape(
-                enabledThumbRadius: 12,
-                elevation: 4,
               ),
-              overlayColor: goalColor.withOpacity(0.2),
-              overlayShape: RoundSliderOverlayShape(overlayRadius: 24),
-            ),
-            child: Slider(
-              value: _weeklyGoal,
-              min: 0.1,
-              max: 2.0,
-              divisions: 19,
-              onChanged: (value) {
-                setState(() {
-                  _weeklyGoal = value;
-                });
-                if ((value * 10) % 5 == 0) {
-                  HapticFeedback.selectionClick();
-                }
-              },
-            ),
+
+              SizedBox(height: 32),
+
+              Expanded(
+                child: ListView.builder(
+                  itemCount: goalOptions.length,
+                  padding: EdgeInsets.zero,
+                  physics: BouncingScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    final option = goalOptions[index];
+                    final isSelected = (_weeklyGoal * 10).round() == ((option['value'] as double) * 10).round();
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _weeklyGoal = option['value'] as double;
+                        });
+                        HapticFeedback.selectionClick();
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isSelected ? goalColor : Colors.transparent,
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        child: Row(
+                          children: [
+                            Text(
+                              option['emoji'] as String,
+                              style: TextStyle(fontSize: 36),
+                            ),
+                            SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${option['value']} kg",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: isSelected ? goalColor : Colors.black87,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    option['text'] as String,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Icon(
+                              isSelected ? Icons.check_circle : Icons.circle_outlined,
+                              color: isSelected ? goalColor : Colors.grey,
+                              size: 24,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
-  }
-
-  Widget _buildWeeklyGoalOption(double value, Color goalColor) {
-    final isSelected = (_weeklyGoal * 10).round() == (value * 10).round();
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _weeklyGoal = value;
-        });
-        HapticFeedback.selectionClick();
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? goalColor : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          '${value.toStringAsFixed(1)}',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: isSelected ? Colors.white : AppColors.text,
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _getWeeklyGoalDescription() {
-    if (_primaryGoal == 'lose_weight') {
-      if (_weeklyGoal <= 0.5) {
-        return "A gentle approach. This may take longer but is easier to maintain.";
-      } else if (_weeklyGoal <= 1.0) {
-        return "A balanced approach. This is recommended for sustainable weight loss.";
-      } else {
-        return "An ambitious goal. This requires strict adherence to diet and exercise.";
-      }
-    } else if (_primaryGoal == 'gain_weight') {
-      if (_weeklyGoal <= 0.5) {
-        return "A gradual approach focused on quality muscle gain with minimal fat.";
-      } else if (_weeklyGoal <= 1.0) {
-        return "A balanced approach for both muscle gain and strength increases.";
-      } else {
-        return "A bulking phase. This may include some fat gain along with muscle.";
-      }
-    } else {
-      return "This helps us set appropriate activity and nutrition goals to maintain your current weight.";
-    }
   }
 
   Widget _buildLoadingScreen() {
@@ -1732,10 +1950,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
         throw Exception("No authenticated user found");
       }
 
-      final currentYear = DateTime
-          .now()
-          .year;
-      final age = currentYear - int.parse(_birthYear!);
+      final age = _age;
 
       final nutritionService = NutritionService();
       final dailyCalories = nutritionService.calculateDailyCalories(
@@ -1757,7 +1972,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow> with SingleTickerPr
         email: currentUser.email ?? '',
         displayName: currentUser.displayName ?? '',
         gender: _gender!,
-        birthYear: _birthYear!,
+        age: _age!,
         height: _height,
         weight: _weight,
         targetWeight: _targetWeight,

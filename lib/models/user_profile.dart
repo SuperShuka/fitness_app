@@ -1,11 +1,9 @@
-// lib/models/user_profile.dart
-
 class UserProfile {
   final String userId;
   final String email;
   final String displayName;
   final String gender;
-  final String birthYear;
+  final int age;
   final double height;
   final double weight;
   final double targetWeight;
@@ -25,7 +23,7 @@ class UserProfile {
     required this.email,
     required this.displayName,
     required this.gender,
-    required this.birthYear,
+    required this.age,
     required this.height,
     required this.weight,
     required this.targetWeight,
@@ -41,14 +39,13 @@ class UserProfile {
     required this.lastUpdated,
   });
 
-  // Create from Firestore document
   factory UserProfile.fromMap(Map<String, dynamic> data) {
     return UserProfile(
       userId: data['userId'] ?? '',
       email: data['email'] ?? '',
       displayName: data['displayName'] ?? '',
       gender: data['gender'] ?? '',
-      birthYear: data['birthYear'] ?? '',
+      age: data['age'] ?? '',
       height: (data['height'] ?? 0).toDouble(),
       weight: (data['weight'] ?? 0).toDouble(),
       targetWeight: (data['targetWeight'] ?? 0).toDouble(),
@@ -72,7 +69,7 @@ class UserProfile {
       'email': email,
       'displayName': displayName,
       'gender': gender,
-      'birthYear': birthYear,
+      'age': age,
       'height': height,
       'weight': weight,
       'targetWeight': targetWeight,
@@ -95,7 +92,7 @@ class UserProfile {
     String? email,
     String? displayName,
     String? gender,
-    String? birthYear,
+    int? age,
     double? height,
     double? weight,
     double? targetWeight,
@@ -115,7 +112,7 @@ class UserProfile {
       email: email ?? this.email,
       displayName: displayName ?? this.displayName,
       gender: gender ?? this.gender,
-      birthYear: birthYear ?? this.birthYear,
+      age: age ?? this.age,
       height: height ?? this.height,
       weight: weight ?? this.weight,
       targetWeight: targetWeight ?? this.targetWeight,

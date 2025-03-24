@@ -66,14 +66,10 @@ class FirestoreService {
         // Create nutrition service
         final nutritionService = NutritionService();
 
-        // Calculate age
-        final currentYear = DateTime.now().year;
-        final age = currentYear - int.parse(currentProfile.birthYear);
-
         // Calculate new daily calorie needs
         final dailyCalories = nutritionService.calculateDailyCalories(
           gender: currentProfile.gender,
-          age: age,
+          age: currentProfile.age,
           height: currentProfile.height,
           weight: newWeight,
           activityLevel: currentProfile.workoutFrequency,

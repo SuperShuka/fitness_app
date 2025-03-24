@@ -1,5 +1,3 @@
-// lib/services/nutrition_service.dart
-
 class NutritionService {
   // Calculate Basal Metabolic Rate (BMR) using Mifflin-St Jeor Equation
   double calculateBMR(String gender, int age, double height, double weight) {
