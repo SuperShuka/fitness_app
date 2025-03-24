@@ -28,7 +28,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow>
   final PageController _pageController = PageController();
   late AnimationController _animationController;
   int _currentStep = 0;
-  int _totalSteps = 8;
+  int _totalSteps = 7;
 
   String? _gender;
   String? _workoutFrequency;
@@ -1913,6 +1913,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow>
     });
 
     try {
+      print("saving try");
       User? currentUser = FirebaseAuth.instance.currentUser;
 
       if (currentUser == null) {
@@ -1928,6 +1929,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow>
         weight: _weight,
         activityLevel: _workoutFrequency!,
       );
+
+      print("saving randomly");
 
       final macros = nutritionService.calculateMacroDistribution(
         calories: dailyCalories,
@@ -1953,9 +1956,9 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow>
         createdAt: DateTime.now(),
         lastUpdated: DateTime.now(),
       );
-
+      print("saving profile");
       await _firestoreService.saveUserProfile(userProfile);
-
+      print("saved profile");
       await Future.delayed(Duration(seconds: 2));
 
       Navigator.of(context).pushReplacement(
