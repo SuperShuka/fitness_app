@@ -14,9 +14,7 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.active) {
           final user = snapshot.data;
-          dPrint(user?.uid);
           if (user == null) {
-            dPrint("Moved to login screen");
             return LoginScreen();
           } else {
             return FutureBuilder<DocumentSnapshot>(
@@ -29,7 +27,6 @@ class AuthWrapper extends StatelessWidget {
                   if (snapshot.data != null && snapshot.data!.exists) {
                     return MainScreen();
                   } else {
-                    dPrint("Moved to profile screen");
                     return ProfileSetupFlow();
                   }
                 }
