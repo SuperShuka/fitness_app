@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:percent_indicator/percent_indicator.dart';
+import '../models/log_item.dart';
+import '../models/macro_item.dart';
+import '../widgets/calories_card.dart';
+import '../widgets/date_selector.dart';
+import '../widgets/log_list.dart';
+import '../widgets/macro_breakdown.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -40,14 +45,57 @@ class _MainScreenState extends State<MainScreen> {
     ),
   ];
 
-  final List<MealLog> meals = [
-    MealLog(
-      name: "Fried Chicken Cutlet",
-      calories: 920,
-      protein: 60,
-      carbs: 40,
-      fat: 56,
-      image: "assets/fried_chicken.jpg", // You'll need to add this asset
+  final List<LogItem> logs = [
+    LogItem(
+      name: "Chicken Salad",
+      calories: 400,
+      image: "assets/chicken_salad.jpg",
+      timestamp: DateTime(2024, 3, 25, 3, 26),
+      type: LogItemType.meal,
+      macros: [
+        MacroDetail(icon: '🍗', value: 40),
+        MacroDetail(icon: '🍞', value: 20),
+        MacroDetail(icon: '🧀', value: 15),
+      ],
+    ),
+    LogItem(
+      name: "Soccer",
+      calories: -460,
+      timestamp: DateTime(2024, 3, 25, 22, 42),
+      type: LogItemType.training,
+    ),
+    LogItem(
+      name: "Lait Sirop Fraise",
+      calories: 150,
+      timestamp: DateTime(2024, 3, 25, 22, 20),
+      type: LogItemType.meal,
+      macros: [
+        MacroDetail(icon: '🍗', value: 6),
+        MacroDetail(icon: '🍞', value: 22),
+        MacroDetail(icon: '🧀', value: 5),
+      ],
+    ),
+    LogItem(
+      name: "Patate et Choux Fleur",
+      calories: 102,
+      timestamp: DateTime(2024, 3, 25, 22, 20),
+      type: LogItemType.meal,
+      macros: [
+        MacroDetail(icon: '🍗', value: 3),
+        MacroDetail(icon: '🍞', value: 22),
+        MacroDetail(icon: '🧀', value: 0),
+      ],
+    ),
+    LogItem(
+      name: "Frites Poulet",
+      calories: 650,
+      timestamp: DateTime(2024, 3, 25, 22, 20),
+      type: LogItemType.meal,
+      macros: [
+        MacroDetail(icon: '🍗', value: 35),
+        MacroDetail(icon: '🍞', value: 55),
+        MacroDetail(icon: '🧀', value: 35),
+      ],
     ),
   ];
 
@@ -95,52 +143,15 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
 
-              // Date Selection Row
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: List.generate(7, (index) {
-                    final date = selectedDate.subtract(Duration(days: selectedDate.weekday - index));
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedDate = date;
-                        });
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 5),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: date.day == selectedDate.day
-                              ? Colors.green
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              weekdays[index],
-                              style: TextStyle(
-                                color: date.day == selectedDate.day
-                                    ? Colors.white
-                                    : Colors.black54,
-                              ),
-                            ),
-                            Text(
-                              date.day.toString(),
-                              style: TextStyle(
-                                color: date.day == selectedDate.day
-                                    ? Colors.white
-                                    : Colors.black87,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-                ),
+              // Date Selector Widget
+              DateSelector(
+                selectedDate: selectedDate,
+                weekdays: weekdays,
+                onDateSelected: (date) {
+                  setState(() {
+                    selectedDate = date;
+                  });
+                },
               ),
 
               Expanded(
@@ -148,181 +159,17 @@ class _MainScreenState extends State<MainScreen> {
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
                     children: [
-                      // Calories Left Card
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      caloriesLeft.toInt().toString(),
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Calories left',
-                                      style: TextStyle(color: Colors.grey.shade600),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              CircularPercentIndicator(
-                                radius: 50,
-                                lineWidth: 10,
-                                percent: (caloriesTotal - caloriesLeft) / caloriesTotal,
-                                center: Icon(Icons.local_fire_department, color: Colors.orange),
-                                progressColor: Colors.green,
-                                backgroundColor: Colors.green.shade100,
-                              ),
-                            ],
-                          ),
-                        ),
+                      // Calories Card Widget
+                      CaloriesCard(
+                        caloriesLeft: caloriesLeft,
+                        caloriesTotal: caloriesTotal,
                       ),
 
-                      // Macros Breakdown
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Row(
-                          children: macros.map((macro) =>
-                              Expanded(
-                                child: Container(
-                                  margin: const EdgeInsets.symmetric(horizontal: 5),
-                                  padding: const EdgeInsets.all(15),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.7),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      CircularPercentIndicator(
-                                        radius: 35,
-                                        lineWidth: 8,
-                                        percent: 1 - (macro.left / macro.total),
-                                        center: Icon(macro.icon, color: macro.color, size: 20),
-                                        progressColor: macro.color,
-                                        backgroundColor: macro.color.withOpacity(0.2),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      Text(
-                                        '${macro.left}g',
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${macro.name} left',
-                                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              )
-                          ).toList(),
-                        ),
-                      ),
+                      // Macro Breakdown Widget
+                      MacroBreakdown(macros: macros),
 
-                      // Meals Log
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Logs',
-                              style: GoogleFonts.poppins(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: meals.length + 1,
-                              itemBuilder: (context, index) {
-                                if (index == meals.length) {
-                                  return Container(
-                                    margin: const EdgeInsets.only(top: 10),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.7),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: IconButton(
-                                      icon: Icon(Icons.add, color: Colors.black87),
-                                      onPressed: () {
-                                        // Add meal functionality
-                                      },
-                                    ),
-                                  );
-                                }
-
-                                final meal = meals[index];
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 10),
-                                  padding: const EdgeInsets.all(15),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.7),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(15),
-                                        child: Image.asset(
-                                          meal.image,
-                                          width: 60,
-                                          height: 60,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 15),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              meal.name,
-                                              style: GoogleFonts.poppins(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Row(
-                                              children: [
-                                                _buildMacroIcon(Icons.fastfood, Colors.red, meal.protein),
-                                                _buildMacroIcon(Icons.bakery_dining, Colors.green, meal.carbs),
-                                                _buildMacroIcon(Icons.cake, Colors.orange, meal.fat),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        '${meal.calories}',
-                                        style: GoogleFonts.poppins(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.green,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
+                      // Meal Log List Widget
+                      LogList(logs: logs),
                     ],
                   ),
                 ),
@@ -343,55 +190,4 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
-
-  Widget _buildMacroIcon(IconData icon, Color color, int value) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 16),
-          const SizedBox(width: 4),
-          Text(
-            value.toString(),
-            style: TextStyle(color: color, fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Data Models remain the same
-class MacroItem {
-  final String name;
-  final int left;
-  final int total;
-  final IconData icon;
-  final Color color;
-
-  MacroItem({
-    required this.name,
-    required this.left,
-    required this.total,
-    required this.icon,
-    required this.color,
-  });
-}
-
-class MealLog {
-  final String name;
-  final int calories;
-  final int protein;
-  final int carbs;
-  final int fat;
-  final String image;
-
-  MealLog({
-    required this.name,
-    required this.calories,
-    required this.protein,
-    required this.carbs,
-    required this.fat,
-    this.image,
-  });
 }
