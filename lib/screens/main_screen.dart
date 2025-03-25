@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -9,52 +9,53 @@ class MainScreen extends StatefulWidget {
   _MainScreenState createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+class _MainScreenState extends State<MainScreen> {
+  DateTime selectedDate = DateTime.now();
+  final List<String> weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   // Sample data
-  final double caloriesConsumed = 300;
-  final double caloriesTarget = 1481;
-  final List<Macro> macros = [
-    Macro(name: "Protein", consumed: 50, target: 100, color: Colors.orangeAccent),
-    Macro(name: "Carbs", consumed: 15, target: 181, color: Colors.pinkAccent),
-    Macro(name: "Fat", consumed: 10, target: 32, color: Colors.tealAccent),
-  ];
-  final List<Meal> meals = [
-    Meal(name: "Lunch", details: "Grilled Chicken", calories: 350),
-    Meal(name: "Snack", details: "Almonds", calories: 150),
+  final double caloriesLeft = 1907;
+  final double caloriesTotal = 2500;
+  final List<MacroItem> macros = [
+    MacroItem(
+      name: "Protein",
+      left: 80,
+      total: 100,
+      icon: Icons.fastfood,
+      color: Colors.red,
+    ),
+    MacroItem(
+      name: "Carbs",
+      left: 242,
+      total: 300,
+      icon: Icons.bakery_dining,
+      color: Colors.green,
+    ),
+    MacroItem(
+      name: "Fat",
+      left: 38,
+      total: 50,
+      icon: Icons.cake,
+      color: Colors.orange,
+    ),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  final List<MealLog> meals = [
+    MealLog(
+      name: "Fried Chicken Cutlet",
+      calories: 920,
+      protein: 60,
+      carbs: 40,
+      fat: 56,
+      image: "assets/fried_chicken.jpg", // You'll need to add this asset
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -62,260 +63,335 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
           ),
         ),
         child: SafeArea(
-          bottom: false,
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            children: [
+              // App Bar and Date Selection
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Header with Profile Button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              '08 Dec',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const Icon(Icons.arrow_drop_down, color: Colors.black87),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                // Add navigation to profile screen here
-                              },
-                              child: CircleAvatar(
-                                radius: 20,
-                                backgroundColor: Colors.grey[300],
-                                child: Icon(Icons.person, color: Colors.grey[700]),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
-
-                    // Calorie Summary
-                    ScaleTransition(
-                      scale: _scaleAnimation,
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 20,
-                              offset: const Offset(5, 5),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.local_fire_department, color: Colors.black54),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Calories',
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                            CircularPercentIndicator(
-                              radius: 80.0,
-                              lineWidth: 12.0,
-                              percent: caloriesConsumed / caloriesTarget,
-                              center: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    caloriesConsumed.toInt().toString(),
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                  Text(
-                                    '/ ${caloriesTarget.toInt()} kcal',
-                                    style: const TextStyle(fontSize: 14, color: Colors.black54),
-                                  ),
-                                ],
-                              ),
-                              progressColor: Colors.black87,
-                              backgroundColor: Colors.black.withOpacity(0.1),
-                              circularStrokeCap: CircularStrokeCap.round,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-
-                    // Macronutrient Summaries
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: macros.map((macro) {
-                        return ScaleTransition(
-                          scale: _scaleAnimation,
-                          child: Column(
-                            children: [
-                              CircularPercentIndicator(
-                                radius: 45.0,
-                                lineWidth: 8.0,
-                                percent: macro.consumed / macro.target,
-                                center: Text(
-                                  '${macro.consumed.toInt()}g',
-                                  style: const TextStyle(fontSize: 16, color: Colors.black87),
-                                ),
-                                progressColor: macro.color,
-                                backgroundColor: Colors.black.withOpacity(0.1),
-                                circularStrokeCap: CircularStrokeCap.round,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                macro.name,
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 14,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 40),
-
-                    // Today's Meal Section
                     Text(
-                      'Today\'s Meal',
-                      style: GoogleFonts.montserrat(
-                        fontSize: 22,
+                      'Dr. Cal',
+                      style: GoogleFonts.poppins(
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 15),
-                    Container(
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 20,
-                            spreadRadius: 5,
-                          ),
-                        ],
-                        border: Border.all(color: Colors.white.withOpacity(0.5)),
-                      ),
-                      child: Column(
-                        children: meals.map((meal) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 25,
-                                  backgroundColor: Colors.black.withOpacity(0.1),
-                                  child: const Icon(Icons.fastfood, color: Colors.black54),
-                                ),
-                                const SizedBox(width: 15),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        meal.name,
-                                        style: GoogleFonts.montserrat(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                      Text(
-                                        meal.details,
-                                        style: const TextStyle(fontSize: 12, color: Colors.black54),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Text(
-                                  '${meal.calories} kcal',
-                                  style: const TextStyle(fontSize: 14, color: Colors.black87),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
+                    GestureDetector(
+                      onTap: () {
+                        // Navigate to profile
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Icon(Icons.person_outline, color: Colors.black87),
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ),
-        ),
-      ),
-      floatingActionButton: GestureDetector(
-        onTap: () {},
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: const LinearGradient(
-              colors: [Colors.blueGrey, Colors.teal],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.blueGrey.withOpacity(0.6),
-                blurRadius: 20,
-                spreadRadius: 5,
+
+              // Date Selection Row
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: List.generate(7, (index) {
+                    final date = selectedDate.subtract(Duration(days: selectedDate.weekday - index));
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedDate = date;
+                        });
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 5),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: date.day == selectedDate.day
+                              ? Colors.green
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              weekdays[index],
+                              style: TextStyle(
+                                color: date.day == selectedDate.day
+                                    ? Colors.white
+                                    : Colors.black54,
+                              ),
+                            ),
+                            Text(
+                              date.day.toString(),
+                              style: TextStyle(
+                                color: date.day == selectedDate.day
+                                    ? Colors.white
+                                    : Colors.black87,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    children: [
+                      // Calories Left Card
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      caloriesLeft.toInt().toString(),
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Calories left',
+                                      style: TextStyle(color: Colors.grey.shade600),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              CircularPercentIndicator(
+                                radius: 50,
+                                lineWidth: 10,
+                                percent: (caloriesTotal - caloriesLeft) / caloriesTotal,
+                                center: Icon(Icons.local_fire_department, color: Colors.orange),
+                                progressColor: Colors.green,
+                                backgroundColor: Colors.green.shade100,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Macros Breakdown
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Row(
+                          children: macros.map((macro) =>
+                              Expanded(
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                                  padding: const EdgeInsets.all(15),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.7),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      CircularPercentIndicator(
+                                        radius: 35,
+                                        lineWidth: 8,
+                                        percent: 1 - (macro.left / macro.total),
+                                        center: Icon(macro.icon, color: macro.color, size: 20),
+                                        progressColor: macro.color,
+                                        backgroundColor: macro.color.withOpacity(0.2),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        '${macro.left}g',
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${macro.name} left',
+                                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              )
+                          ).toList(),
+                        ),
+                      ),
+
+                      // Meals Log
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Logs',
+                              style: GoogleFonts.poppins(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: meals.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index == meals.length) {
+                                  return Container(
+                                    margin: const EdgeInsets.only(top: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.7),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: IconButton(
+                                      icon: Icon(Icons.add, color: Colors.black87),
+                                      onPressed: () {
+                                        // Add meal functionality
+                                      },
+                                    ),
+                                  );
+                                }
+
+                                final meal = meals[index];
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 10),
+                                  padding: const EdgeInsets.all(15),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.7),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(15),
+                                        child: Image.asset(
+                                          meal.image,
+                                          width: 60,
+                                          height: 60,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 15),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              meal.name,
+                                              style: GoogleFonts.poppins(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Row(
+                                              children: [
+                                                _buildMacroIcon(Icons.fastfood, Colors.red, meal.protein),
+                                                _buildMacroIcon(Icons.bakery_dining, Colors.green, meal.carbs),
+                                                _buildMacroIcon(Icons.cake, Colors.orange, meal.fat),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Text(
+                                        '${meal.calories}',
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
-          child: const Icon(Icons.add, size: 30, color: Colors.white),
         ),
+      ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 20.0, left: 30),
+        child: FloatingActionButton(
+          onPressed: () {
+            // Add functionality
+          },
+          backgroundColor: Colors.black,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMacroIcon(IconData icon, Color color, int value) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 16),
+          const SizedBox(width: 4),
+          Text(
+            value.toString(),
+            style: TextStyle(color: color, fontSize: 12),
+          ),
+        ],
       ),
     );
   }
 }
 
-// Data Models
-class Macro {
+// Data Models remain the same
+class MacroItem {
   final String name;
-  final double consumed;
-  final double target;
+  final int left;
+  final int total;
+  final IconData icon;
   final Color color;
 
-  Macro({required this.name, required this.consumed, required this.target, required this.color});
+  MacroItem({
+    required this.name,
+    required this.left,
+    required this.total,
+    required this.icon,
+    required this.color,
+  });
 }
 
-class Meal {
+class MealLog {
   final String name;
-  final String details;
   final int calories;
+  final int protein;
+  final int carbs;
+  final int fat;
+  final String image;
 
-  Meal({required this.name, required this.details, required this.calories});
+  MealLog({
+    required this.name,
+    required this.calories,
+    required this.protein,
+    required this.carbs,
+    required this.fat,
+    this.image,
+  });
 }
