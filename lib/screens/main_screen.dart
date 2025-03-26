@@ -1,3 +1,4 @@
+import 'package:fitness_app/widgets/add_log_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/log_item.dart';
@@ -182,7 +183,16 @@ class _MainScreenState extends State<MainScreen> {
         padding: const EdgeInsets.only(bottom: 20.0, left: 30),
         child: FloatingActionButton(
           onPressed: () {
-            // Add functionality
+            showModalBottomSheet(
+              context: context,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+              ),
+              isScrollControlled: false,
+              builder: (context) => AddLogWidget(),
+            );
           },
           backgroundColor: Colors.black,
           child: const Icon(Icons.add, color: Colors.white),
