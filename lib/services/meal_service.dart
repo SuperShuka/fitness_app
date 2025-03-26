@@ -17,7 +17,7 @@ class MealService {
         .collection('meals')
         .where('userId', isEqualTo: userId)
         .where('date', isEqualTo: date)
-        .orderBy('timestamp', descending: true)
+        .orderBy('timestamp', descending: false)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) => Meal.fromDocument(doc)).toList();

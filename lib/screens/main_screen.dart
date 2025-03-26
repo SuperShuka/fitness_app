@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_app/models/user_profile.dart';
 import 'package:fitness_app/widgets/add_log_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -27,33 +30,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     ref.read(logsProvider.notifier).loadLogsFromFirebase(selectedDate);
   }
 
-  // Sample data
-  final double caloriesLeft = 1907;
-  final double caloriesTotal = 2500;
-  final List<MacroItem> macros = [
-    MacroItem(
-      name: "Protein",
-      left: 80,
-      total: 100,
-      icon: Icons.fastfood,
-      color: Colors.red,
-    ),
-    MacroItem(
-      name: "Carbs",
-      left: 242,
-      total: 300,
-      icon: Icons.bakery_dining,
-      color: Colors.green,
-    ),
-    MacroItem(
-      name: "Fat",
-      left: 38,
-      total: 50,
-      icon: Icons.cake,
-      color: Colors.orange,
-    ),
-  ];
-
   double calculateTotalCalories(List<LogItem> logs) {
     return logs.fold(0, (total, log) => total + log.calories);
   }
@@ -81,7 +57,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     return [
       MacroItem(
         name: "Protein",
-        left: 100 - protein,
+        left:  - protein,
         total: 100,
         icon: Icons.fastfood,
         color: Colors.red,
@@ -167,7 +143,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
               Expanded(
                 child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
+                  physics: const BouncingScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics()
+                  ),
                   child: Column(
                     children: [
                       // Calories Card Widget
@@ -181,6 +159,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
                       // Meal Log List Widget
                       LogList(logs: logs),
+
+                      SizedBox(height: 100),
                     ],
                   ),
                 ),
