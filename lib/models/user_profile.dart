@@ -129,3 +129,108 @@ class UserProfile {
     );
   }
 }
+
+extension UserProfileCalculations on UserProfile {
+  double calculateBMR() {
+    if (gender.toLowerCase() == 'male') {
+      return 10 * weight + 6.25 * height - 5 * age + 5;
+    } else if (gender.toLowerCase() == 'female') {
+      return 10 * weight + 6.25 * height - 5 * age - 161;
+    }
+    return 10 * weight + 6.25 * height - 5 * age;
+  }
+
+  double _getActivityMultiplier() {
+    switch (workoutFrequency.toLowerCase()) {
+      case 'sedentary':
+        return 1.2;
+      case 'light':
+        return 1.375;
+      case 'moderate':
+        return 1.55;
+      case 'very active':
+        return 1.725;
+      case 'extra active':
+        return 1.9;
+      default:
+        return 1.375; // Default to light activity
+    }
+  }
+
+  // Calculate Total Daily Energy Expenditure (TDEE)
+  double calculateTDEE() {
+    return calculateBMR() * _getActivityMultiplier();
+  }
+
+  // Calculate calorie adjustment based on weekly weight goal
+  int calculateDailyCalories() {
+    // Calories per kg of weight change
+    const caloriesPerKg = 7700; // Approximately 7700 calories per kg
+
+    // Calculate calorie adjustment based on weekly goal
+    double calorieAdjustment = (weeklyGoal * caloriesPerKg) / 7;
+
+    // Determine if user wants to lose or gain weight
+    bool isLosingWeight = weeklyGoal < 0;
+
+    // Calculate base calories
+    double baseCal = calculateTDEE();
+
+    // Adjust calories based on weight goal
+    if (isLosingWeight) {
+      // Calorie deficit for weight loss
+      return (baseCal - calorieAdjustment).round();
+    } else {
+      // Calorie surplus for weight gain
+      return (baseCal + calorieAdjustment).round();
+    }
+  }
+
+  // Macronutrient Recommendations
+  int calculateProteinGoal() {
+    double proteinMultiplier = 1.6;
+    return (weight * proteinMultiplier).round();
+  }
+
+  int calculateCarbGoal() {
+    // Carb recommendation: 45-65% of total calories
+    // Adjust based on activity level and goal
+    int totalCalories = calculateDailyCalories();
+    double carbPercentage = workoutFrequency.toLowerCase() == 'very active' ? 0.65 : 0.50;
+    return ((totalCalories * carbPercentage) / 4).round(); // 4 calories per gram of carbs
+  }
+
+  int calculateFatGoal() {
+    // Fat recommendation: 20-35% of total calories
+    int totalCalories = calculateDailyCalories();
+    double fatPercentage = 0.25; // Moderate fat intake
+    return ((totalCalories * fatPercentage) / 9).round(); // 9 calories per gram of fat
+  }
+
+  int calculateWaterGoal() {
+    // Water intake recommendation: 30-35 ml per kg of body weight
+    // Adjust based on activity level
+    double baseWaterIntake = weight * 35; // ml
+
+    switch (workoutFrequency.toLowerCase()) {
+      case 'very active':
+        return (baseWaterIntake * 1.2).round();
+      case 'extra active':
+        return (baseWaterIntake * 1.5).round();
+      default:
+        return baseWaterIntake.round();
+    }
+  }
+
+  // Method to update profile with calculated goals
+  UserProfile updateNutritionGoals() {
+    return copyWith(
+      dailyCalories: calculateDailyCalories(),
+      proteinGoal: calculateProteinGoal(),
+      carbsGoal: calculateCarbGoal(),
+      fatGoal: calculateFatGoal(),
+      waterGoal: calculateWaterGoal(),
+      lastUpdated: DateTime.now(),
+    );
+  }
+}

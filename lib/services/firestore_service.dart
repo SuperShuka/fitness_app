@@ -1,113 +1,168 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/user_profile.dart';
-import 'nutrition_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+import '../models/user_profile.dart'; // Adjust import path as needed
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Collection references
-  final CollectionReference _usersCollection =
-  FirebaseFirestore.instance.collection('users');
+  // Collection reference
+  CollectionReference get _userProfilesCollection =>
+      _firestore.collection('users');
 
-  // Save user profile to Firestore
-  Future<void> saveUserProfile(UserProfile userProfile) async {
+  // Create a new user profile
+  Future<UserProfile> createUserProfile(UserProfile userProfile) async {
     try {
-      await _usersCollection
-          .doc(userProfile.userId)
-          .set(userProfile.toMap(), SetOptions(merge: true));
-
-      print('User profile saved successfully');
-    } catch (e) {
-      print('Error saving user profile: $e');
-      throw e;
-    }
-  }
-
-  // Get user profile from Firestore
-  Future<UserProfile?> getUserProfile(String userId) async {
-    try {
-      DocumentSnapshot doc = await _usersCollection.doc(userId).get();
-
-      if (doc.exists && doc.data() != null) {
-        return UserProfile.fromMap(doc.data() as Map<String, dynamic>);
+      // Ensure the user profile has the current user's ID
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('No authenticated user found');
       }
 
-      return null;
+      // Ensure userId matches the current authenticated user
+      final profileToSave = userProfile.copyWith(
+          userId: currentUser.uid,
+          createdAt: DateTime.now(),
+          lastUpdated: DateTime.now()
+      );
+
+      // Calculate initial nutrition goals
+      final updatedProfile = profileToSave.updateNutritionGoals();
+
+      // Save to Firestore
+      await _userProfilesCollection.doc(currentUser.uid).set(
+          updatedProfile.toMap(),
+          SetOptions(merge: true)
+      );
+
+      return updatedProfile;
     } catch (e) {
-      print('Error getting user profile: $e');
-      throw e;
+      debugPrint('Error creating user profile: $e');
+      rethrow;
     }
   }
 
-  // Update specific fields in user profile
-  Future<void> updateUserProfile(String userId, Map<String, dynamic> data) async {
+  // Update existing user profile
+  Future<UserProfile> updateUserProfile({
+    required Map<String, dynamic> updates,
+    bool recalculateGoals = true,
+  }) async {
     try {
-      // Add lastUpdated timestamp
-      data['lastUpdated'] = DateTime.now();
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('No authenticated user found');
+      }
 
-      await _usersCollection
-          .doc(userId)
-          .update(data);
+      // Fetch current profile
+      final docSnapshot = await _userProfilesCollection.doc(currentUser.uid).get();
 
-      print('User profile updated successfully');
-    } catch (e) {
-      print('Error updating user profile: $e');
-      throw e;
-    }
-  }
-
-  // Update user weight and recalculate nutritional needs
-  Future<void> updateUserWeight(String userId, double newWeight) async {
-    try {
-      // Get current user profile
-      UserProfile? currentProfile = await getUserProfile(userId);
-
-      if (currentProfile != null) {
-        // Create nutrition service
-        final nutritionService = NutritionService();
-
-        // Calculate new daily calorie needs
-        final dailyCalories = nutritionService.calculateDailyCalories(
-          gender: currentProfile.gender,
-          age: currentProfile.age,
-          height: currentProfile.height,
-          weight: newWeight,
-          activityLevel: currentProfile.workoutFrequency,
-        );
-
-        // Calculate new macro distribution
-        final macros = nutritionService.calculateMacroDistribution(
-          calories: dailyCalories,
-        );
-
-        // Update user profile with new weight and nutritional needs
-        await _usersCollection.doc(userId).update({
-          'weight': newWeight,
-          'dailyCalories': dailyCalories,
-          'proteinGoal': macros['protein'],
-          'carbsGoal': macros['carbs'],
-          'fatGoal': macros['fat'],
-          'lastUpdated': DateTime.now(),
-        });
-
-        print('User weight updated and nutritional needs recalculated');
-      } else {
+      if (!docSnapshot.exists) {
         throw Exception('User profile not found');
       }
+
+      // Convert existing data to UserProfile
+      UserProfile existingProfile = UserProfile.fromMap(
+          docSnapshot.data() as Map<String, dynamic>
+      );
+
+      // Create an updated profile using individual parameters
+      UserProfile updatedProfile = existingProfile.copyWith(
+        userId: updates['userId'] ?? existingProfile.userId,
+        email: updates['email'] ?? existingProfile.email,
+        displayName: updates['displayName'] ?? existingProfile.displayName,
+        gender: updates['gender'] ?? existingProfile.gender,
+        age: updates['age'] ?? existingProfile.age,
+        height: updates['height'] ?? existingProfile.height,
+        weight: updates['weight'] ?? existingProfile.weight,
+        targetWeight: updates['targetWeight'] ?? existingProfile.targetWeight,
+        primaryGoal: updates['primaryGoal'] ?? existingProfile.primaryGoal,
+        workoutFrequency: updates['workoutFrequency'] ?? existingProfile.workoutFrequency,
+        weeklyGoal: updates['weeklyGoal'] ?? existingProfile.weeklyGoal,
+        dailyCalories: updates['dailyCalories'] ?? existingProfile.dailyCalories,
+        proteinGoal: updates['proteinGoal'] ?? existingProfile.proteinGoal,
+        carbsGoal: updates['carbsGoal'] ?? existingProfile.carbsGoal,
+        fatGoal: updates['fatGoal'] ?? existingProfile.fatGoal,
+        waterGoal: updates['waterGoal'] ?? existingProfile.waterGoal,
+        lastUpdated: DateTime.now(),
+      );
+
+      // Optionally recalculate nutrition goals
+      if (recalculateGoals) {
+        updatedProfile = updatedProfile.updateNutritionGoals();
+      }
+
+      // Save to Firestore
+      await _userProfilesCollection.doc(currentUser.uid).update(
+          updatedProfile.toMap()
+      );
+
+      return updatedProfile;
     } catch (e) {
-      print('Error updating user weight: $e');
-      throw e;
+      debugPrint('Error updating user profile: $e');
+      rethrow;
+    }
+  }
+
+  // Retrieve user profile
+  Future<UserProfile?> getUserProfile() async {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        return null;
+      }
+
+      final docSnapshot = await _userProfilesCollection.doc(currentUser.uid).get();
+
+      if (!docSnapshot.exists) {
+        return null;
+      }
+
+      return UserProfile.fromMap(
+          docSnapshot.data() as Map<String, dynamic>
+      );
+    } catch (e) {
+      debugPrint('Error retrieving user profile: $e');
+      return null;
+    }
+  }
+
+  // Stream user profile for real-time updates
+  Stream<UserProfile?> getUserProfileStream() {
+    try {
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        return Stream.value(null);
+      }
+
+      return _userProfilesCollection
+          .doc(currentUser.uid)
+          .snapshots()
+          .map((snapshot) {
+        if (!snapshot.exists) return null;
+        return UserProfile.fromMap(
+            snapshot.data() as Map<String, dynamic>
+        );
+      });
+    } catch (e) {
+      debugPrint('Error in user profile stream: $e');
+      return Stream.value(null);
     }
   }
 
   // Delete user profile
-  Future<void> deleteUserProfile(String userId) async {
+  Future<void> deleteUserProfile() async {
     try {
-      await _usersCollection.doc(userId).delete();
-      print('User profile deleted successfully');
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('No authenticated user found');
+      }
+
+      await _userProfilesCollection.doc(currentUser.uid).delete();
     } catch (e) {
-      print('Error deleting user profile: $e');
-      throw e;
+      debugPrint('Error deleting user profile: $e');
+      rethrow;
     }
   }
 }

@@ -1936,7 +1936,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow>
         calories: dailyCalories,
       );
 
-      final userProfile = UserProfile(
+      UserProfile userProfile = UserProfile(
         userId: currentUser.uid,
         email: currentUser.email ?? '',
         displayName: currentUser.displayName ?? '',
@@ -1956,9 +1956,8 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow>
         createdAt: DateTime.now(),
         lastUpdated: DateTime.now(),
       );
-      print("saving profile");
-      await _firestoreService.saveUserProfile(userProfile);
-      print("saved profile");
+      userProfile = userProfile.updateNutritionGoals();
+      await _firestoreService.createUserProfile(userProfile);
       await Future.delayed(Duration(seconds: 2));
 
       Navigator.of(context).pushReplacement(
