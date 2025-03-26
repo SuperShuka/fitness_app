@@ -1,31 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 import '../models/log_item.dart';
+import 'firestore_logs_service.dart';
 import 'nutrition_api_service.dart';
 
 // Providers
 final nutritionApiServiceProvider = Provider((ref) => NutritionApiService());
+final firebaseLogsServiceProvider = Provider((ref) => FirebaseLogsService());
 
 class LogsNotifier extends StateNotifier<List<LogItem>> {
   final NutritionApiService _nutritionService;
+  final FirebaseLogsService _firebaseLogsService;
 
-  LogsNotifier(this._nutritionService) : super([]);
+  LogsNotifier(this._nutritionService, this._firebaseLogsService) : super([]);
 
   Future<void> addLogItemByDescription(
       BuildContext context,
       String foodDescription,
       ) async {
-    // Show loading dialog
     _showLoadingDialog(context);
 
     try {
       final logItem = await _nutritionService.getNutritionByDescription(foodDescription);
 
-      // Close loading dialog
       Navigator.of(context).pop();
 
       if (logItem != null) {
@@ -40,35 +40,35 @@ class LogsNotifier extends StateNotifier<List<LogItem>> {
     }
   }
 
-  Future<void> addLogItemByBarcode(BuildContext context) async {
-    try {
-      // Scan barcode
-      String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          "#ff6666",
-          "Cancel",
-          true,
-          ScanMode.BARCODE
-      );
-
-      if (barcodeScanRes != '-1') {
-        // Show loading
-        _showLoadingDialog(context);
-
-        final logItem = await _nutritionService.getNutritionByBarcode(barcodeScanRes);
-
-        // Close loading dialog
-        Navigator.of(context).pop();
-
-        if (logItem != null) {
-          await _showFoodDetailsDialog(context, logItem);
-        } else {
-          _showErrorDialog(context, 'Could not find nutrition for this barcode');
-        }
-      }
-    } catch (e) {
-      _showErrorDialog(context, 'Barcode scanning error: $e');
-    }
-  }
+  // Future<void> addLogItemByBarcode(BuildContext context) async {
+  //   try {
+  //     // Scan barcode
+  //     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+  //         "#ff6666",
+  //         "Cancel",
+  //         true,
+  //         ScanMode.BARCODE
+  //     );
+  //
+  //     if (barcodeScanRes != '-1') {
+  //       // Show loading
+  //       _showLoadingDialog(context);
+  //
+  //       final logItem = await _nutritionService.getNutritionByBarcode(barcodeScanRes);
+  //
+  //       // Close loading dialog
+  //       Navigator.of(context).pop();
+  //
+  //       if (logItem != null) {
+  //         await _showFoodDetailsDialog(context, logItem);
+  //       } else {
+  //         _showErrorDialog(context, 'Could not find nutrition for this barcode');
+  //       }
+  //     }
+  //   } catch (e) {
+  //     _showErrorDialog(context, 'Barcode scanning error: $e');
+  //   }
+  // }
 
   Future<void> addLogItemByAiScan(BuildContext context) async {
     final picker = ImagePicker();
@@ -107,9 +107,7 @@ class LogsNotifier extends StateNotifier<List<LogItem>> {
             Text('Calories: ${logItem.calories.toStringAsFixed(2)}'),
             SizedBox(height: 10),
             Text('Macros:'),
-            ...logItem.macros.map((macro) =>
-                Text('${macro.icon}: ${macro.value.toStringAsFixed(2)}')
-            ).toList(),
+            ...logItem.macros!.map((macro) => Text('${macro.icon} ${macro.value.toStringAsFixed(2)}g')),
           ],
         ),
         actions: [
@@ -194,9 +192,36 @@ class LogsNotifier extends StateNotifier<List<LogItem>> {
       ),
     );
   }
+
+  Future<void> syncLogsToFirebase() async {
+    try {
+      await _firebaseLogsService.syncLogsToFirebase(state);
+    } catch (e) {
+      print('Error syncing logs to Firebase: $e');
+    }
+  }
+
+  Future<void> loadLogsFromFirebase(DateTime date) async {
+    try {
+      final logsStream = _firebaseLogsService.getLogs(date);
+      logsStream.listen((logs) {
+        state = logs;
+      });
+    } catch (e) {
+      print('Error loading logs from Firebase: $e');
+    }
+  }
+
+  void addLogItem(LogItem logItem) {
+    state = [...state, logItem];
+    syncLogsToFirebase();
+  }
 }
 
 // Provider for logs state
 final logsProvider = StateNotifierProvider<LogsNotifier, List<LogItem>>((ref) {
-  return LogsNotifier(ref.read(nutritionApiServiceProvider));
+  return LogsNotifier(
+      ref.read(nutritionApiServiceProvider),
+      ref.read(firebaseLogsServiceProvider)
+  );
 });

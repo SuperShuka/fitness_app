@@ -74,7 +74,7 @@ class AddLogWidget extends StatelessWidget {
                   label: 'Scan',
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.pushNamed(context, '/food-scanner');
+                    ref.read(logsProvider.notifier).addLogItemByAiScan(context);
                   },
                 ),
               ],
@@ -82,35 +82,6 @@ class AddLogWidget extends StatelessWidget {
           ),
           SizedBox(height: 20),
         ],
-      ),
-    );
-  }
-  void _showScanOptions(BuildContext context, WidgetRef ref) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Container(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.camera_alt),
-              title: Text('AI Food Recognition'),
-              onTap: () {
-                Navigator.pop(context);
-                ref.read(logsProvider.notifier).addLogItemByAiScan(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.qr_code),
-              title: Text('Barcode Scan'),
-              onTap: () {
-                Navigator.pop(context);
-                ref.read(logsProvider.notifier).addLogItemByBarcode(context);
-              },
-            ),
-          ],
-        ),
       ),
     );
   }

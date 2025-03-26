@@ -3,21 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/log_item.dart';
 import '../models/macro_item.dart';
+import '../services/logs_notifier.dart';
 import '../widgets/calories_card.dart';
 import '../widgets/date_selector.dart';
 import '../widgets/log_list.dart';
 import '../widgets/macro_breakdown.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class MainScreen extends StatefulWidget {
+class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
 
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends ConsumerState<MainScreen> {
   DateTime selectedDate = DateTime.now();
   final List<String> weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(logsProvider.notifier).loadLogsFromFirebase(selectedDate);
+  }
 
   // Sample data
   final double caloriesLeft = 1907;
@@ -46,62 +54,63 @@ class _MainScreenState extends State<MainScreen> {
     ),
   ];
 
-  final List<LogItem> logs = [
-    LogItem(
-      name: "Chicken Salad",
-      calories: 400,
-      image: "assets/chicken_salad.jpg",
-      timestamp: DateTime(2024, 3, 25, 3, 26),
-      type: LogItemType.meal,
-      macros: [
-        MacroDetail(icon: '🍗', value: 40),
-        MacroDetail(icon: '🍞', value: 20),
-        MacroDetail(icon: '🧀', value: 15),
-      ],
-    ),
-    LogItem(
-      name: "Soccer",
-      calories: -460,
-      timestamp: DateTime(2024, 3, 25, 22, 42),
-      type: LogItemType.training,
-    ),
-    LogItem(
-      name: "Lait Sirop Fraise",
-      calories: 150,
-      timestamp: DateTime(2024, 3, 25, 22, 20),
-      type: LogItemType.meal,
-      macros: [
-        MacroDetail(icon: '🍗', value: 6),
-        MacroDetail(icon: '🍞', value: 22),
-        MacroDetail(icon: '🧀', value: 5),
-      ],
-    ),
-    LogItem(
-      name: "Patate et Choux Fleur",
-      calories: 102,
-      timestamp: DateTime(2024, 3, 25, 22, 20),
-      type: LogItemType.meal,
-      macros: [
-        MacroDetail(icon: '🍗', value: 3),
-        MacroDetail(icon: '🍞', value: 22),
-        MacroDetail(icon: '🧀', value: 0),
-      ],
-    ),
-    LogItem(
-      name: "Frites Poulet",
-      calories: 650,
-      timestamp: DateTime(2024, 3, 25, 22, 20),
-      type: LogItemType.meal,
-      macros: [
-        MacroDetail(icon: '🍗', value: 35),
-        MacroDetail(icon: '🍞', value: 55),
-        MacroDetail(icon: '🧀', value: 35),
-      ],
-    ),
-  ];
+  double calculateTotalCalories(List<LogItem> logs) {
+    return logs.fold(0, (total, log) => total + log.calories);
+  }
+
+  List<MacroItem> calculateMacroBreakdown(List<LogItem> logs) {
+    int protein = 0, carbs = 0, fat = 0;
+
+    for (var log in logs) {
+      if (log.macros != null) {
+        for (var macro in log.macros!) {
+          switch (macro.icon) {
+            case '🍗':
+              protein += macro.value;
+              break;
+            case '🍞':
+              carbs += macro.value;
+              break;
+            case '🧀':
+              fat += macro.value;
+              break;
+          }
+        }
+      }
+    }
+    return [
+      MacroItem(
+        name: "Protein",
+        left: 100 - protein,
+        total: 100,
+        icon: Icons.fastfood,
+        color: Colors.red,
+      ),
+      MacroItem(
+        name: "Carbs",
+        left: 300 - carbs,
+        total: 300,
+        icon: Icons.bakery_dining,
+        color: Colors.green,
+      ),
+      MacroItem(
+        name: "Fat",
+        left: 50 - fat,
+        total: 50,
+        icon: Icons.cake,
+        color: Colors.orange,
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final logs = ref.watch(logsProvider);
+
+    final totalCalories = calculateTotalCalories(logs);
+    final caloriesLeft = 2500 - totalCalories;
+    final macros = calculateMacroBreakdown(logs);
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -152,6 +161,7 @@ class _MainScreenState extends State<MainScreen> {
                   setState(() {
                     selectedDate = date;
                   });
+                  ref.read(logsProvider.notifier).loadLogsFromFirebase(date);
                 },
               ),
 
