@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/log_item.dart';
+import '../utils/debug_print.dart';
 
 class NutritionApiService {
   static const String appId = 'abf1ae27';
@@ -21,6 +22,7 @@ class NutritionApiService {
         }),
       );
 
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
@@ -29,21 +31,21 @@ class NutritionApiService {
 
           return LogItem(
             name: food['food_name'] ?? foodDescription,
-            calories: food['nf_calories']?.toDouble() ?? 0.0,
+            calories: food['nf_calories']?.toInt() ?? 0.0,
             timestamp: DateTime.now(),
             type: LogItemType.meal,
             macros: [
               MacroDetail(
                   icon: '🍗',
-                  value: food['nf_protein']?.toDouble() ?? 0.0
+                  value: food['nf_protein']?.toInt() ?? 0.0
               ),
               MacroDetail(
                   icon: '🍞',
-                  value: food['nf_total_carbohydrate']?.toDouble() ?? 0.0
+                  value: food['nf_total_carbohydrate']?.toInt() ?? 0.0
               ),
               MacroDetail(
                   icon: '🧀',
-                  value: food['nf_total_fat']?.toDouble() ?? 0.0
+                  value: food['nf_total_fat']?.toInt() ?? 0.0
               ),
             ],
           );

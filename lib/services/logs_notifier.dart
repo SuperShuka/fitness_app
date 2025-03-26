@@ -29,12 +29,11 @@ class LogsNotifier extends StateNotifier<List<LogItem>> {
       Navigator.of(context).pop();
 
       if (logItem != null) {
-        await _showFoodDetailsDialog(context, logItem);
+        await _firebaseLogsService.addLogItem(logItem);
       } else {
         _showErrorDialog(context, 'Could not find nutrition information');
       }
     } catch (e) {
-      // Close loading dialog
       Navigator.of(context).pop();
       _showErrorDialog(context, 'An error occurred: $e');
     }
@@ -95,6 +94,8 @@ class LogsNotifier extends StateNotifier<List<LogItem>> {
   }
 
   Future<void> _showFoodDetailsDialog(BuildContext context, LogItem logItem) async {
+    state = [...state, logItem];
+
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(

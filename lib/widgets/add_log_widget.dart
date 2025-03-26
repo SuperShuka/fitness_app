@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/logs_notifier.dart';
 
-class AddLogWidget extends StatelessWidget {
+class AddLogWidget extends ConsumerWidget {
   const AddLogWidget({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(

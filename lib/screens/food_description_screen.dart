@@ -16,6 +16,7 @@ class _DescribeFoodScreenState extends ConsumerState<DescribeFoodScreen> {
         context,
         _foodController.text
     );
+    Navigator.pop(context);
   }
 
   @override
