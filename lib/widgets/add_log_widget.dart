@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../services/logs_notifier.dart';
 
 class AddLogWidget extends StatelessWidget {
   const AddLogWidget({Key? key}) : super(key: key);
@@ -79,6 +82,35 @@ class AddLogWidget extends StatelessWidget {
           ),
           SizedBox(height: 20),
         ],
+      ),
+    );
+  }
+  void _showScanOptions(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.camera_alt),
+              title: Text('AI Food Recognition'),
+              onTap: () {
+                Navigator.pop(context);
+                ref.read(logsProvider.notifier).addLogItemByAiScan(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.qr_code),
+              title: Text('Barcode Scan'),
+              onTap: () {
+                Navigator.pop(context);
+                ref.read(logsProvider.notifier).addLogItemByBarcode(context);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
