@@ -42,8 +42,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
   }
 
-  double calculateTotalCalories(List<LogItem> logs) {
-    return logs.fold(0, (total, log) => total + log.calories);
+  double calculateCaloriesLeft(List<LogItem> logs) {
+    final dailyCalorieGoal = userProfile?.dailyCalories.toDouble() ?? 2500.0;
+    final totalConsumedCalories = logs.fold(0, (total, log) => total + log.calories);
+    return dailyCalorieGoal - totalConsumedCalories;
   }
 
   List<MacroItem> calculateMacroBreakdown(List<LogItem> logs) {
@@ -94,9 +96,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final logs = ref.watch(logsProvider);
-    final totalCalories = calculateTotalCalories(logs);
+    final totalCalories = userProfile?.dailyCalories.toDouble() ?? 2500.0;
+    final caloriesLeft = calculateCaloriesLeft(logs);
     final macros = calculateMacroBreakdown(logs);
-    final caloriesLeft = userProfile?.dailyCalories.toDouble() ?? 2500.0 - totalCalories;
 
     return Scaffold(
       body: Container(
@@ -141,16 +143,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
               ),
 
               // Date Selector Widget
-              DateSelector(
-                selectedDate: selectedDate,
-                weekdays: weekdays,
-                onDateSelected: (date) {
-                  setState(() {
-                    selectedDate = date;
-                  });
-                  ref.read(logsProvider.notifier).loadLogsFromFirebase(date);
-                },
-              ),
+              // DateSelector(
+              //   selectedDate: selectedDate,
+              //   weekdays: weekdays,
+              //   onDateSelected: (date) {
+              //     setState(() {
+              //       selectedDate = date;
+              //     });
+              //     ref.read(logsProvider.notifier).loadLogsFromFirebase(date);
+              //   },
+              // ),
 
               Expanded(
                 child: SingleChildScrollView(

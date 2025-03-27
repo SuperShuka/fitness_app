@@ -25,7 +25,8 @@ class NutritionApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-
+        dPrint(data);
+        dPrint(data['foods'].length);
         if (data['foods'] != null && data['foods'].isNotEmpty) {
           final food = data['foods'][0];
 
