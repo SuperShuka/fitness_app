@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/firestore_logs_service.dart';
 import '../services/logs_notifier.dart';
+import 'food_details_widget.dart';
 
 class LogList extends ConsumerWidget {
   final List<LogItem> logs;
@@ -54,116 +55,125 @@ class LogList extends ConsumerWidget {
                   // Remove the log from the state
                   ref.read(logsProvider.notifier).state =
                       logs.where((item) => item != log).toList();
-                  ref
-                      .read(firebaseLogsServiceProvider)
-                      .deleteLogItem(log);
+                  ref.read(firebaseLogsServiceProvider).deleteLogItem(log);
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.2),
-                        spreadRadius: 1,
-                        blurRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          children: [
-                            if (log.image != null)
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.asset(
-                                      log.image!,
-                                      width: 80,
-                                      height: 80,
-                                      fit: BoxFit.cover,
-                                    ) ??
-                                    Icon(Icons.image),
-                              ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    log.name,
-                                    style: GoogleFonts.poppins(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  // Macros
-                                  if (log.macros != null)
-                                    Row(
-                                      children: log.macros!
-                                          .map((macro) => Padding(
-                                                padding: const EdgeInsets.only(
-                                                    right: 10),
-                                                child: Row(
-                                                  children: [
-                                                    Text(
-                                                      macro.icon,
-                                                      style: const TextStyle(
-                                                          fontSize: 16),
-                                                    ),
-                                                    const SizedBox(width: 4),
-                                                    Text(
-                                                      '${macro.value}g',
-                                                      style: const TextStyle(
-                                                          fontSize: 14),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ))
-                                          .toList(),
-                                    ),
-                                ],
-                              ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Row(
+                child: GestureDetector(
+                  onTap: () {
+                    // Navigate to detailed view when log is tapped
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              FoodDetailsWidget(logItem: log)),
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.2),
+                          spreadRadius: 1,
+                          blurRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            children: [
+                              if (log.image != null)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.asset(
+                                        log.image!,
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover,
+                                      ) ??
+                                      Icon(Icons.image),
+                                ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(
-                                      Icons.local_fire_department,
-                                      color: log.calories >= 0
-                                          ? Colors.orange
-                                          : Colors.red,
-                                    ),
                                     Text(
-                                      '${log.calories}',
+                                      log.name,
                                       style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.bold,
-                                        color: log.calories >= 0
-                                            ? Colors.orange
-                                            : Colors.red,
                                         fontSize: 16,
                                       ),
                                     ),
+                                    const SizedBox(height: 8),
+                                    // Macros
+                                    if (log.macros != null)
+                                      Row(
+                                        children: log.macros!
+                                            .map((macro) => Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 10),
+                                                  child: Row(
+                                                    children: [
+                                                      Text(
+                                                        macro.icon,
+                                                        style: const TextStyle(
+                                                            fontSize: 16),
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Text(
+                                                        '${macro.value}g',
+                                                        style: const TextStyle(
+                                                            fontSize: 14),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ))
+                                            .toList(),
+                                      ),
                                   ],
                                 ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  DateFormat('h:mm a').format(log.timestamp),
-                                  style: TextStyle(
-                                    color: Colors.grey.shade600,
-                                    fontSize: 12,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.local_fire_department,
+                                        color: log.calories >= 0
+                                            ? Colors.orange
+                                            : Colors.red,
+                                      ),
+                                      Text(
+                                        '${log.calories}',
+                                        style: GoogleFonts.poppins(
+                                          fontWeight: FontWeight.bold,
+                                          color: log.calories >= 0
+                                              ? Colors.orange
+                                              : Colors.red,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    DateFormat('h:mm a').format(log.timestamp),
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );

@@ -54,14 +54,6 @@ class AddLogWidget extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 LogActionButton(
-                  icon: Icons.search,
-                  label: 'Describe Food',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, '/describe-food');
-                  },
-                ),
-                LogActionButton(
                   icon: Icons.bookmark,
                   label: 'Saved',
                   onTap: () {
@@ -70,14 +62,50 @@ class AddLogWidget extends ConsumerWidget {
                   },
                 ),
                 LogActionButton(
-                  icon: Icons.qr_code_scanner,
-                  label: 'Scan',
+                  icon: Icons.qr_code,
+                  label: 'Barcode',
+                  onTap: () {
+                    Navigator.pop(context);
+                    // Add barcode scanning logic
+                  },
+                ),
+                LogActionButton(
+                  icon: Icons.document_scanner,
+                  label: 'AI Scan',
                   onTap: () {
                     Navigator.pop(context);
                     ref.read(logsProvider.notifier).addLogItemByAiScan(context);
                   },
                 ),
               ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/describe-food');
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.search, color: Colors.grey[600]),
+                    SizedBox(width: 10),
+                    Text(
+                      'Describe food',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
           SizedBox(height: 20),
