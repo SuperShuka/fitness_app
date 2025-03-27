@@ -8,7 +8,7 @@ class NutritionApiService {
   static const String apiKey = '2c8f12ecd62f5367303ecccd3df5e55f';
   static const String baseUrl = 'https://trackapi.nutritionix.com/v2/natural/nutrients';
 
-  Future<LogItem?> getNutritionByDescription(String foodDescription) async {
+  Future<List<LogItem>> getNutritionByDescription(String foodDescription) async {
     try {
       final response = await http.post(
         Uri.parse(baseUrl),
@@ -25,40 +25,41 @@ class NutritionApiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        List<LogItem> logItems = [];
         dPrint(data);
-        dPrint(data['foods'].length);
-        if (data['foods'] != null && data['foods'].isNotEmpty) {
-          final food = data['foods'][0];
 
-          return LogItem(
+        for (var food in data['foods']) {
+          dPrint("adding ${food['food_name']}");
+          logItems.add(LogItem(
             name: food['food_name'] ?? foodDescription,
-            calories: food['nf_calories']?.toInt() ?? 0.0,
+            calories: food['nf_calories']?.toInt() ?? 0,
             timestamp: DateTime.now(),
             type: LogItemType.meal,
             macros: [
               MacroDetail(
                   icon: '🍗',
-                  value: food['nf_protein']?.toInt() ?? 0.0
+                  value: food['nf_protein']?.toInt() ?? 0
               ),
               MacroDetail(
                   icon: '🍞',
-                  value: food['nf_total_carbohydrate']?.toInt() ?? 0.0
+                  value: food['nf_total_carbohydrate']?.toInt() ?? 0
               ),
               MacroDetail(
                   icon: '🧀',
-                  value: food['nf_total_fat']?.toInt() ?? 0.0
+                  value: food['nf_total_fat']?.toInt() ?? 0
               ),
             ],
-          );
+          ));
         }
+
+        return logItems;
       }
     } catch (e) {
       print('Nutrition API Error: $e');
     }
-    return null;
+    return [];
   }
 
-  // Barcode nutrition lookup
   Future<LogItem?> getNutritionByBarcode(String barcode) async {
     try {
       final response = await http.get(

@@ -24,12 +24,15 @@ class LogsNotifier extends StateNotifier<List<LogItem>> {
     _showLoadingDialog(context);
 
     try {
-      final logItem = await _nutritionService.getNutritionByDescription(foodDescription);
+      final logItems = await _nutritionService.getNutritionByDescription(foodDescription);
 
       Navigator.of(context).pop();
 
-      if (logItem != null) {
-        await _firebaseLogsService.addLogItem(logItem);
+      if (logItems != []) {
+        for (var logItem in logItems) {
+          await _firebaseLogsService.addLogItem(logItem);
+          state = [...state, logItem];
+        }
       } else {
         _showErrorDialog(context, 'Could not find nutrition information');
       }
