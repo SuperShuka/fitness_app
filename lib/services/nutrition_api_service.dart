@@ -26,7 +26,6 @@ class NutritionApiService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         List<LogItem> logItems = [];
-        dPrint(data);
 
         for (var food in data['foods']) {
           dPrint("adding ${food['food_name']}");

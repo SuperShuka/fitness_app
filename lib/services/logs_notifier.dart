@@ -31,7 +31,6 @@ class LogsNotifier extends StateNotifier<List<LogItem>> {
       if (logItems != []) {
         for (var logItem in logItems) {
           await _firebaseLogsService.addLogItem(logItem);
-          state = [...state, logItem];
         }
       } else {
         _showErrorDialog(context, 'Could not find nutrition information');

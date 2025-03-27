@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_app/utils/debug_print.dart';
 import '../models/log_item.dart';
 
 class FirebaseLogsService {
@@ -99,5 +100,31 @@ class FirebaseLogsService {
     }
 
     await batch.commit();
+  }
+
+  Future<void> deleteLogItem(LogItem logItem) async {
+    if (currentUserId == null) {
+      throw Exception('User not logged in');
+    }
+
+    try {
+      // Query to find the specific log item
+      final querySnapshot = await _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .collection('logs')
+          .where('name', isEqualTo: logItem.name)
+          .where('calories', isEqualTo: logItem.calories)
+          .where('timestamp', isEqualTo: logItem.timestamp)
+          .get();
+
+      // Delete all matching documents
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.delete();
+      }
+    } catch (e) {
+      print('Error deleting log item: $e');
+      rethrow;
+    }
   }
 }
