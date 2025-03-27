@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -45,7 +47,7 @@ class CaloriesCard extends StatelessWidget {
             CircularPercentIndicator(
               radius: 50,
               lineWidth: 10,
-              percent: (caloriesTotal - caloriesLeft) / caloriesTotal,
+              percent: min(1, (caloriesTotal - caloriesLeft) / caloriesTotal),
               center: Icon(Icons.local_fire_department, color: Colors.orange),
               progressColor: Colors.green,
               backgroundColor: Colors.green.shade100,

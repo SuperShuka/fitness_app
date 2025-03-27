@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -30,7 +32,7 @@ class MacroBreakdown extends StatelessWidget {
                     CircularPercentIndicator(
                       radius: 35,
                       lineWidth: 8,
-                      percent: 1 - (macro.left / macro.total),
+                      percent: min(1 - (macro.left / macro.total), 1),
                       center: Icon(macro.icon, color: macro.color, size: 20),
                       progressColor: macro.color,
                       backgroundColor: macro.color.withOpacity(0.2),

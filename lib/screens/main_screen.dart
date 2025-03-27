@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/log_item.dart';
 import '../models/macro_item.dart';
+import '../services/firestore_service.dart';
 import '../services/logs_notifier.dart';
 import '../widgets/calories_card.dart';
 import '../widgets/date_selector.dart';
@@ -23,11 +24,22 @@ class MainScreen extends ConsumerStatefulWidget {
 class _MainScreenState extends ConsumerState<MainScreen> {
   DateTime selectedDate = DateTime.now();
   final List<String> weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  UserProfile? userProfile;
 
   @override
   void initState() {
     super.initState();
     ref.read(logsProvider.notifier).loadLogsFromFirebase(selectedDate);
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    final firestoreService = FirestoreService();
+    final profile = await firestoreService.getUserProfile();
+
+    setState(() {
+      userProfile = profile;
+    });
   }
 
   double calculateTotalCalories(List<LogItem> logs) {
@@ -57,22 +69,22 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     return [
       MacroItem(
         name: "Protein",
-        left:  - protein,
-        total: 100,
+        left: (userProfile?.proteinGoal ?? 100) - protein,
+        total: userProfile?.proteinGoal ?? 100,
         icon: Icons.fastfood,
         color: Colors.red,
       ),
       MacroItem(
         name: "Carbs",
-        left: 300 - carbs,
-        total: 300,
+        left: (userProfile?.carbsGoal ?? 300) - carbs,
+        total: userProfile?.carbsGoal ?? 300,
         icon: Icons.bakery_dining,
         color: Colors.green,
       ),
       MacroItem(
         name: "Fat",
-        left: 50 - fat,
-        total: 50,
+        left: (userProfile?.fatGoal ?? 50) - fat,
+        total: userProfile?.fatGoal ?? 50,
         icon: Icons.cake,
         color: Colors.orange,
       ),
@@ -82,10 +94,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final logs = ref.watch(logsProvider);
-
     final totalCalories = calculateTotalCalories(logs);
-    final caloriesLeft = 2500 - totalCalories;
     final macros = calculateMacroBreakdown(logs);
+    final caloriesLeft = userProfile?.dailyCalories.toDouble() ?? 2500.0 - totalCalories;
 
     return Scaffold(
       body: Container(
@@ -151,7 +162,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       // Calories Card Widget
                       CaloriesCard(
                         caloriesLeft: caloriesLeft,
-                        caloriesTotal: caloriesTotal,
+                        caloriesTotal: userProfile?.dailyCalories.toDouble() ?? 2500.0,
                       ),
 
                       // Macro Breakdown Widget
