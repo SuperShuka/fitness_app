@@ -18,9 +18,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _isPasswordVisible = false;
   bool _isLoading = false;
+  String? _errorMessage;
 
   void _handleGoogleSignIn() async {
-    setState(() { _isLoading = true; });
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
     try {
       User? user = await _authService.signInWithGoogle();
       if (user != null) {
@@ -30,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      _showErrorSnackBar('Google Sign-In failed');
+      _handleAuthError(e);
     } finally {
       setState(() { _isLoading = false; });
     }
@@ -38,7 +42,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleEmailSignIn() async {
     if (_formKey.currentState!.validate()) {
-      setState(() { _isLoading = true; });
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
       try {
         User? user = await _authService.signIn(
             email: _emailController.text.trim(),
@@ -51,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } catch (e) {
-        _showErrorSnackBar('Sign-in failed. Please check your credentials.');
+        _handleAuthError(e);
       } finally {
         setState(() { _isLoading = false; });
       }
@@ -60,7 +67,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleEmailSignUp() async {
     if (_formKey.currentState!.validate()) {
-      setState(() { _isLoading = true; });
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
       try {
         User? user = await _authService.signUp(
             email: _emailController.text.trim(),
@@ -73,26 +83,50 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } catch (e) {
-        _showErrorSnackBar('Sign-up failed. Please try again.');
+        _handleAuthError(e);
       } finally {
         setState(() { _isLoading = false; });
       }
     }
   }
 
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
+  void _handleAuthError(dynamic error) {
+    String errorMessage = 'An unexpected error occurred';
+
+    if (error is FirebaseAuthException) {
+      switch (error.code) {
+        case 'user-not-found':
+          errorMessage = 'No user found with this email';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Incorrect password';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Invalid email address';
+          break;
+        case 'email-already-in-use':
+          errorMessage = 'Email is already registered';
+          break;
+        case 'weak-password':
+          errorMessage = 'Password is too weak';
+          break;
+        case 'network-request-failed':
+          errorMessage = 'Network error. Please check your connection';
+          break;
+        default:
+          errorMessage = error.message ?? 'Authentication failed';
+      }
+    }
+    errorMessage = error.toString();
+    setState(() {
+      _errorMessage = errorMessage;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xFFF5F5DC),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -135,6 +169,33 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   SizedBox(height: 48),
 
+                  // Error Message Display
+                  if (_errorMessage != null)
+                    Container(
+                      margin: EdgeInsets.only(bottom: 16),
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade100,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.red.shade300),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline, color: Colors.red),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: GoogleFonts.poppins(
+                                color: Colors.red.shade800,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
                   // Email Input
                   TextFormField(
                     controller: _emailController,
@@ -162,7 +223,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderSide: BorderSide(color: Colors.red, width: 2),
                       ),
                       filled: true,
-                      fillColor: Colors.grey.shade50,
+                      fillColor: Colors.white,
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -216,7 +277,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderSide: BorderSide(color: Colors.red, width: 2),
                       ),
                       filled: true,
-                      fillColor: Colors.grey.shade50,
+                      fillColor: Colors.white,
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -235,7 +296,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
-                        // Implement forgot password
+                        // TODO: Implement forgot password functionality
                       },
                       child: Text(
                         'Forgot Password?',
@@ -253,14 +314,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   ElevatedButton(
                     onPressed: _isLoading ? null : _handleEmailSignIn,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF4CAF50),
+                      backgroundColor: Colors.black, // Changed to match main screen's floating action button
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
                       elevation: 0,
-                      disabledBackgroundColor: Color(0xFF4CAF50).withOpacity(0.6),
+                      disabledBackgroundColor: Colors.black.withOpacity(0.6),
                     ),
                     child: _isLoading
                         ? SizedBox(
@@ -285,8 +346,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   OutlinedButton(
                     onPressed: _isLoading ? null : _handleEmailSignUp,
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Color(0xFF4CAF50),
-                      side: BorderSide(color: Color(0xFF4CAF50)),
+                      foregroundColor: Colors.black,
+                      side: BorderSide(color: Colors.black),
                       padding: EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
