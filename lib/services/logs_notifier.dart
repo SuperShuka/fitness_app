@@ -41,35 +41,35 @@ class LogsNotifier extends StateNotifier<List<LogItem>> {
     }
   }
 
-  // Future<void> addLogItemByBarcode(BuildContext context) async {
-  //   try {
-  //     // Scan barcode
-  //     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-  //         "#ff6666",
-  //         "Cancel",
-  //         true,
-  //         ScanMode.BARCODE
-  //     );
-  //
-  //     if (barcodeScanRes != '-1') {
-  //       // Show loading
-  //       _showLoadingDialog(context);
-  //
-  //       final logItem = await _nutritionService.getNutritionByBarcode(barcodeScanRes);
-  //
-  //       // Close loading dialog
-  //       Navigator.of(context).pop();
-  //
-  //       if (logItem != null) {
-  //         await _showFoodDetailsDialog(context, logItem);
-  //       } else {
-  //         _showErrorDialog(context, 'Could not find nutrition for this barcode');
-  //       }
-  //     }
-  //   } catch (e) {
-  //     _showErrorDialog(context, 'Barcode scanning error: $e');
-  //   }
-  // }
+  Future<void> addLogItemByBarcode(BuildContext context) async {
+    try {
+      // Scan barcode
+      String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          "#ff6666",
+          "Cancel",
+          true,
+          ScanMode.BARCODE
+      );
+
+      if (barcodeScanRes != '-1') {
+        // Show loading
+        _showLoadingDialog(context);
+
+        final logItem = await _nutritionService.getNutritionByBarcode(barcodeScanRes);
+
+        // Close loading dialog
+        Navigator.of(context).pop();
+
+        if (logItem != null) {
+          await _showFoodDetailsDialog(context, logItem);
+        } else {
+          _showErrorDialog(context, 'Could not find nutrition for this barcode');
+        }
+      }
+    } catch (e) {
+      _showErrorDialog(context, 'Barcode scanning error: $e');
+    }
+  }
 
   Future<void> addLogItemByAiScan(BuildContext context) async {
     final picker = ImagePicker();
