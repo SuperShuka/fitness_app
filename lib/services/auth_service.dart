@@ -5,31 +5,34 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  Future signUp({required String email, required String password}) async {
+  Future<User?> signUp({required String email, required String password}) async {
     try {
-      await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return null;
+      return userCredential.user;
     } on FirebaseAuthException catch (e) {
-      return e.message;
+      throw e.message ?? 'Sign up failed';
     }
   }
 
-  Future signIn({required String email, required String password}) async {
+  Future<User?> signIn({required String email, required String password}) async {
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
-      return null;
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+          email: email,
+          password: password
+      );
+      return userCredential.user;
     } on FirebaseAuthException catch (e) {
-      return e.message;
+      throw e.message ?? 'Sign in failed';
     }
   }
 
   Future<User?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null;
+      if (googleUser == null) throw 'Google sign-in cancelled';
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
@@ -40,8 +43,7 @@ class AuthService {
       final UserCredential userCredential = await _auth.signInWithCredential(credential);
       return userCredential.user;
     } catch (e) {
-      print("Google Sign-In Error: $e");
-      return null;
+      throw e.toString();
     }
   }
 

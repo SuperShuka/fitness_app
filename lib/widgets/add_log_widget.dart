@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/logs_notifier.dart';
+import 'describe_food_widget.dart';
 
 class AddLogWidget extends ConsumerWidget {
   const AddLogWidget({Key? key}) : super(key: key);
@@ -84,7 +85,22 @@ class AddLogWidget extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/describe-food');
+                Navigator.pop(context);
+                showModalBottomSheet(
+                  context: context,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                  ),
+                  isScrollControlled: true,  // This allows the sheet to move up with the keyboard
+                  builder: (context) => Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).viewInsets.bottom
+                    ),
+                    child: DescribeFoodWidget(),
+                  ),
+                );
               },
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 15, vertical: 12),

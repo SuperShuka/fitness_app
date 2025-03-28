@@ -1,3 +1,4 @@
+import 'package:fitness_app/screens/auth_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user != null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => ProfileSetupFlow()),
+          MaterialPageRoute(builder: (context) => AuthWrapper()),
         );
       }
     } catch (e) {
@@ -54,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (user != null) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => ProfileSetupFlow()),
+            MaterialPageRoute(builder: (context) => AuthWrapper()),
           );
         }
       } catch (e) {
@@ -79,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (user != null) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => ProfileSetupFlow()),
+            MaterialPageRoute(builder: (context) => AuthWrapper()),
           );
         }
       } catch (e) {
@@ -95,8 +96,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (error is FirebaseAuthException) {
       switch (error.code) {
-        case 'user-not-found':
-          errorMessage = 'No user found with this email';
+        case 'The supplied auth credential is incorrect, malformed or has expired.':
+          errorMessage = 'Incorrect login or password';
           break;
         case 'wrong-password':
           errorMessage = 'Incorrect password';
@@ -116,8 +117,13 @@ class _LoginScreenState extends State<LoginScreen> {
         default:
           errorMessage = error.message ?? 'Authentication failed';
       }
+    } else {
+      errorMessage = error.toString();
+      if (errorMessage == 'The supplied auth credential is incorrect, malformed or has expired.') {
+        errorMessage = 'Incorrect login or password';
+      }
     }
-    errorMessage = error.toString();
+
     setState(() {
       _errorMessage = errorMessage;
     });
@@ -126,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5F5DC),
+      backgroundColor: Color(0xFFF5F5DC), // Keeping the beige background
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -145,14 +151,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
-                          color: Color(0xFF4CAF50).withOpacity(0.1),
+                          color: Color(0xFF8B4513).withOpacity(0.1), // Changed to a rich brown
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Icon(
                             Icons.local_dining,
                             size: 40,
-                            color: Color(0xFF4CAF50),
+                            color: Color(0xFF8B4513), // Rich brown color
                           ),
                         ),
                       ),
@@ -161,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         'Track your calories with ease',
                         style: GoogleFonts.poppins(
                           fontSize: 16,
-                          color: Colors.grey[600],
+                          color: Colors.brown[700],
                         ),
                       ),
                     ],
