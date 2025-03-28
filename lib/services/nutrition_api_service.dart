@@ -1,4 +1,6 @@
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:openfoodfacts/openfoodfacts.dart';
 import 'dart:convert';
 import '../models/log_item.dart';
 import '../utils/debug_print.dart';
@@ -61,44 +63,42 @@ class NutritionApiService {
 
   Future<LogItem?> getNutritionByBarcode(String barcode) async {
     try {
-      final response = await http.get(
-        Uri.parse('https://trackapi.nutritionix.com/v2/search/item?upc=$barcode'),
-        headers: {
-          'x-app-id': appId,
-          'x-app-key': apiKey,
-        },
-      );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+      OpenFoodAPIConfiguration.userAgent = UserAgent(name: 'fitness_app');
 
-        if (data['foods'] != null && data['foods'].isNotEmpty) {
-          final food = data['foods'][0];
+      OpenFoodAPIConfiguration.globalLanguages = <OpenFoodFactsLanguage>[OpenFoodFactsLanguage.RUSSIAN, OpenFoodFactsLanguage.ENGLISH];
+      ProductResultV3 result = await OpenFoodAPIClient.getProductV3(ProductQueryConfiguration(
+        barcode,
+        language: OpenFoodFactsLanguage.RUSSIAN, version: ProductQueryVersion.v3,
+      ));
 
-          return LogItem(
-            name: food['food_name'] ?? 'Scanned Item',
-            calories: food['nf_calories']?.toDouble() ?? 0.0,
-            timestamp: DateTime.now(),
-            type: LogItemType.meal,
-            macros: [
-              MacroDetail(
-                  icon: '🍗',
-                  value: food['nf_protein']?.toDouble() ?? 0.0
-              ),
-              MacroDetail(
-                  icon: '🍞',
-                  value: food['nf_total_carbohydrate']?.toDouble() ?? 0.0
-              ),
-              MacroDetail(
-                  icon: '🧀',
-                  value: food['nf_total_fat']?.toDouble() ?? 0.0
-              ),
-            ],
-          );
-        }
+      if (result.product != null) {
+        final product = result.product!;
+
+        return LogItem(
+          name: product.productName ?? 'Scanned Item',
+          calories: product.nutriments?.getValue(Nutrient.energyKCal, PerSize.oneHundredGrams)?.toInt() ?? 0,
+          timestamp: DateTime.now(),
+          type: LogItemType.meal,
+          macros: [
+            MacroDetail(
+              icon: '🍗',
+              value: product.nutriments?.getValue(Nutrient.proteins, PerSize.oneHundredGrams)?.toInt() ?? 0,
+            ),
+            MacroDetail(
+              icon: '🍞',
+              value: product.nutriments?.getValue(Nutrient.carbohydrates, PerSize.oneHundredGrams)?.toInt() ?? 0,
+            ),
+            MacroDetail(
+              icon: '🧀',
+              value: product.nutriments?.getValue(Nutrient.fat, PerSize.oneHundredGrams)?.toInt() ?? 0,
+            ),
+          ],
+
+        );
       }
     } catch (e) {
-      print('Barcode Lookup Error: $e');
+      print('OpenFoodFacts Barcode Lookup Error: $e');
     }
     return null;
   }

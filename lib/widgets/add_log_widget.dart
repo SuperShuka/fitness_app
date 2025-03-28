@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner_plus/flutter_barcode_scanner_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../services/firestore_logs_service.dart';
+import '../services/nutrition_api_service.dart';
+import '../utils/debug_print.dart';
 import '../services/logs_notifier.dart';
 import 'describe_food_widget.dart';
 
@@ -67,7 +71,7 @@ class AddLogWidget extends ConsumerWidget {
                   label: 'Barcode',
                   onTap: () {
                     Navigator.pop(context);
-                    // Add barcode scanning logic
+                    ref.read(logsProvider.notifier).addLogItemByBarcode();
                   },
                 ),
                 LogActionButton(
