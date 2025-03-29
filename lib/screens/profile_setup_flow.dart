@@ -5,7 +5,6 @@ import '../models/user_profile.dart';
 import '../services/nutrition_service.dart';
 import 'package:fitness_app/services/firestore_service.dart';
 import 'main_screen.dart';
-import 'package:lottie/lottie.dart';
 
 class AppColors {
   static const Color primary = Color(0xFF000000);
@@ -1867,13 +1866,6 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.asset(
-            'assets/animations/loading.json',
-            width: 200,
-            height: 200,
-            fit: BoxFit.contain,
-          ),
-          SizedBox(height: 40),
           Text(
             "Setting up your personalized plan",
             style: TextStyle(

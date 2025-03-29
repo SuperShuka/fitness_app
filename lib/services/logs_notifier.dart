@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner_plus/flutter_barcode_scanner_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:openfoodfacts/openfoodfacts.dart';
@@ -9,7 +12,6 @@ import '../models/log_item.dart';
 import 'firestore_logs_service.dart';
 import 'nutrition_api_service.dart';
 
-// Providers
 final nutritionApiServiceProvider = Provider((ref) => NutritionApiService());
 final firebaseLogsServiceProvider = Provider((ref) => FirebaseLogsService());
 
@@ -34,8 +36,7 @@ class LogsNotifier extends StateNotifier<List<LogItem>> {
         _showErrorDialog(context, 'Could not find nutrition information');
       }
     } catch (e) {
-      Navigator.of(context).pop();
-      _showErrorDialog(context, 'An error occurred: $e');
+      print("Error adding log item by description: $e");
     }
   }
 
@@ -67,22 +68,51 @@ class LogsNotifier extends StateNotifier<List<LogItem>> {
   }
 
   Future<void> addLogItemByAiScan(BuildContext context) async {
+    final apiKey = '62919a9541524dc2ac390cc43eb39deb';
+    final baseUrl = 'https://api.clarifai.com/v2/models/food-item-recognition/outputs';
+    final userId = '6vd8ir7ptuwd';
+    final appId = 'food-recognition';
     final picker = ImagePicker();
     try {
-      final pickedFile = await picker.pickImage(source: ImageSource.camera);
+      final pickedFile = await picker.pickImage(source: ImageSource.camera, imageQuality: 90);
 
       if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        final base64Image = base64Encode(bytes);
 
-        // Here you would integrate an AI food recognition service
-        // For now, we'll use a manual description approach
-        final fileName = pickedFile.path.split('/').last;
-
-        // Close loading dialog
-        Navigator.of(context).pop();
-
+        final response = await http.post(
+          Uri.parse(baseUrl),
+          headers: {
+            'Authorization': 'Key $apiKey',
+            'Content-Type': 'application/json',
+          },
+          body: json.encode({
+            'inputs': [
+              {
+                'data': {
+                  'image': {
+                    'base64': base64Image,
+                  },
+                },
+              },
+            ],
+          }),
+        );
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          addLogItemByDescription(context, data['outputs'][0]['data']['concepts'][0]['name']);
+          // for (var concept in data['outputs'][0]['data']['concepts']) {
+          //   if (concept['value'] > 0.80) {
+          //     addLogItemByDescription(context, concept['name']);
+          //   }
+          // }
+        }
+        else{
+          print(response.body);
+        }
       }
     } catch (e) {
-      _showErrorDialog(context, 'AI Scan error: $e');
+      print("AI scan error: $e");
     }
   }
 
