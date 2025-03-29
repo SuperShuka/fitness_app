@@ -127,7 +127,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     ),
                     GestureDetector(
                       onTap: () {
-                        // Navigate to profile
+                        Navigator.pushNamed(context, '/profile');
                       },
                       child: Container(
                         padding: const EdgeInsets.all(8),

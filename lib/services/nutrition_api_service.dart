@@ -28,12 +28,13 @@ class NutritionApiService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         List<LogItem> logItems = [];
+        int duration_add = 0;
 
         for (var food in data['foods']) {
           logItems.add(LogItem(
             name: food['food_name'] ?? foodDescription,
             calories: food['nf_calories']?.toDouble() ?? 0.0,
-            timestamp: DateTime.now(),
+            timestamp: DateTime.now().add(Duration(seconds: duration_add++)),
             type: LogItemType.meal,
             macros: [
               MacroDetail(

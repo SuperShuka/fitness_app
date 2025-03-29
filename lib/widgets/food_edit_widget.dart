@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,7 +37,7 @@ class _FoodEditWidgetState extends ConsumerState<FoodEditWidget> {
     // Initialize weight controller
     _originalWeight = widget.logItem.weight ?? 100;
     _weightController = TextEditingController(
-        text: (widget.logItem.weight ?? _originalWeight).toString()
+        text: (min(widget.logItem.weight ?? _originalWeight, 500)).toString()
     );
 
     // Initialize macro controllers
@@ -360,8 +362,7 @@ class _FoodEditWidgetState extends ConsumerState<FoodEditWidget> {
     );
 
     if (updatedLogItem != widget.logItem) {
-      ref.read(firebaseLogsServiceProvider).deleteLogItem(widget.logItem);
-      ref.read(firebaseLogsServiceProvider).addLogItem(updatedLogItem);
+      ref.read(firebaseLogsServiceProvider).updateLogItem(widget.logItem);
       ref.read(logsProvider.notifier).state = [
         ...ref.read(logsProvider.notifier).state.where((log) => log != widget.logItem),
         updatedLogItem

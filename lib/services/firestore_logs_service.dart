@@ -127,4 +127,36 @@ class FirebaseLogsService {
       rethrow;
     }
   }
+
+  Future<void> updateLogItem(LogItem updatedLogItem) async {
+    if (currentUserId == null) {
+      throw Exception('User not logged in');
+    }
+
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .collection('logs')
+          .where('timestamp', isEqualTo: updatedLogItem.timestamp)
+          .get();
+
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.update({
+          'name': updatedLogItem.name,
+          'calories': updatedLogItem.calories,
+          'type': updatedLogItem.type.toString(),
+          'macros': updatedLogItem.macros?.map((macro) => {
+            'icon': macro.icon,
+            'value': macro.value
+          }).toList(),
+          'weight': updatedLogItem.weight,
+        });
+      }
+    } catch (e) {
+      print('Error updating log item: $e');
+      rethrow;
+    }
+  }
+
 }

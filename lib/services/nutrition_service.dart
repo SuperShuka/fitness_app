@@ -60,15 +60,15 @@ class NutritionService {
     switch (goal.toLowerCase()) {
       case 'lose_weight':
       // Higher protein for muscle preservation during weight loss
-        proteinPercentage = 0.30; // 30%
+        proteinPercentage = 0.25; // 30%
         fatPercentage = 0.30; // 30%
-        carbsPercentage = 0.40; // 40%
+        carbsPercentage = 0.45; // 40%
         break;
       case 'gain_weight':
       // Higher carbs for energy to build muscle
         proteinPercentage = 0.25; // 25%
-        fatPercentage = 0.25; // 25%
-        carbsPercentage = 0.50; // 50%
+        fatPercentage = 0.30; // 25%
+        carbsPercentage = 0.45; // 50%
         break;
       case 'maintain_weight':
       default:

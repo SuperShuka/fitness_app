@@ -133,11 +133,11 @@ class UserProfile {
 extension UserProfileCalculations on UserProfile {
   double calculateBMR() {
     if (gender.toLowerCase() == 'male') {
-      return 10 * weight + 6.25 * height - 5 * age + 5;
+      return (10 * weight) + (6.25 * height) - (5 * age) + 5;
     } else if (gender.toLowerCase() == 'female') {
-      return 10 * weight + 6.25 * height - 5 * age - 161;
+      return (10 * weight) + (6.25 * height) - (5 * age) - 161;
     }
-    return 10 * weight + 6.25 * height - 5 * age;
+    return (10 * weight) + (6.25 * height) - (5 * age);
   }
 
   double _getActivityMultiplier() {
@@ -153,7 +153,7 @@ extension UserProfileCalculations on UserProfile {
       case 'extra active':
         return 1.9;
       default:
-        return 1.375; // Default to light activity
+        return 1.375; // Default to light activity if unrecognized.
     }
   }
 
@@ -164,72 +164,93 @@ extension UserProfileCalculations on UserProfile {
 
   // Calculate calorie adjustment based on weekly weight goal
   int calculateDailyCalories() {
-    // Calories per kg of weight change
-    const caloriesPerKg = 7700; // Approximately 7700 calories per kg
-
-    // Calculate calorie adjustment based on weekly goal
-    double calorieAdjustment = (weeklyGoal * caloriesPerKg) / 7;
-
-    // Determine if user wants to lose or gain weight
-    bool isLosingWeight = weeklyGoal < 0;
-
-    // Calculate base calories
-    double baseCal = calculateTDEE();
-
-    // Adjust calories based on weight goal
-    if (isLosingWeight) {
-      // Calorie deficit for weight loss
-      return (baseCal - calorieAdjustment).round();
+    double tdee = calculateTDEE();
+    // If a weekly goal is provided (non-zero), use that for more precise adjustment.
+    // The weeklyGoal is assumed to be in kg/week. Approximately 7700 calories correspond to 1kg.
+    if (primaryGoal.toLowerCase().contains('lose')) {
+      if (weeklyGoal < 0) {
+        double calorieDeficit = (-weeklyGoal * 7700) / 7;
+        return (tdee - calorieDeficit).round();
+      }
+      return (tdee - 500).round();
+    } else if (primaryGoal.toLowerCase().contains('gain')) {
+      if (weeklyGoal > 0) {
+        double calorieSurplus = (weeklyGoal * 7700) / 7;
+        return (tdee + calorieSurplus).round();
+      }
+      return (tdee + 500).round();
     } else {
-      // Calorie surplus for weight gain
-      return (baseCal + calorieAdjustment).round();
+      return tdee.round();
     }
   }
 
   // Macronutrient Recommendations
-  int calculateProteinGoal() {
-    double proteinMultiplier = 1.6;
-    return (weight * proteinMultiplier).round();
-  }
+  Map<String, int> calculateMacronutrients() {
+    int calories = calculateDailyCalories();
+    double proteinRatio;
+    double fatRatio;
+    double carbRatio;
 
-  int calculateCarbGoal() {
-    // Carb recommendation: 45-65% of total calories
-    // Adjust based on activity level and goal
-    int totalCalories = calculateDailyCalories();
-    double carbPercentage = workoutFrequency.toLowerCase() == 'very active' ? 0.65 : 0.50;
-    return ((totalCalories * carbPercentage) / 4).round(); // 4 calories per gram of carbs
-  }
+    // Set macro ratios based on the primary goal.
+    if (primaryGoal.toLowerCase().contains('lose')) {
+      // Higher protein to preserve muscle and a moderate carb intake.
+      proteinRatio = 0.20;
+      fatRatio = 0.30;
+      carbRatio = 0.50;
+    } else if (primaryGoal.toLowerCase().contains('gain')) {
+      // Slightly lower protein with higher carbs for energy.
+      proteinRatio = 0.20;
+      fatRatio = 0.35;
+      carbRatio = 0.45;
+    } else {
+      // Balanced distribution for weight maintenance.
+      proteinRatio = 0.20;
+      fatRatio = 0.35;
+      carbRatio = 0.45;
+    }
 
-  int calculateFatGoal() {
-    // Fat recommendation: 20-35% of total calories
-    int totalCalories = calculateDailyCalories();
-    double fatPercentage = 0.25; // Moderate fat intake
-    return ((totalCalories * fatPercentage) / 9).round(); // 9 calories per gram of fat
+    // Calculate calories for each macronutrient.
+    int proteinCalories = (calories * proteinRatio).round();
+    int fatCalories = (calories * fatRatio).round();
+    // Assign remaining calories to carbs.
+    int carbCalories = calories - (proteinCalories + fatCalories);
+
+    // Convert calories to grams: Protein & Carbs (4 cal/g), Fat (9 cal/g).
+    int proteinGrams = (proteinCalories / 4).round();
+    int fatGrams = (fatCalories / 9).round();
+    int carbGrams = (carbCalories / 4).round();
+
+    return {
+      'protein': proteinGrams,
+      'fat': fatGrams,
+      'carbs': carbGrams,
+    };
   }
 
   int calculateWaterGoal() {
-    // Water intake recommendation: 30-35 ml per kg of body weight
-    // Adjust based on activity level
-    double baseWaterIntake = weight * 35; // ml
+    // Base water recommendation: 35 ml per kg of body weight.
+    double baseWater = weight * 35;
 
-    switch (workoutFrequency.toLowerCase()) {
-      case 'very active':
-        return (baseWaterIntake * 1.2).round();
-      case 'extra active':
-        return (baseWaterIntake * 1.5).round();
-      default:
-        return baseWaterIntake.round();
+    // Increase water needs based on activity level.
+    if (workoutFrequency.toLowerCase() == 'very active') {
+      return (baseWater * 1.2).round();
+    } else if (workoutFrequency.toLowerCase() == 'extra active') {
+      return (baseWater * 1.5).round();
     }
+    return baseWater.round();
   }
 
   // Method to update profile with calculated goals
   UserProfile updateNutritionGoals() {
+    int dailyCals = calculateDailyCalories();
+    Map<String, int> macros = calculateMacronutrients();
+    int water = calculateWaterGoal();
     return copyWith(
-      dailyCalories: calculateDailyCalories(),
-      proteinGoal: calculateProteinGoal(),
-      carbsGoal: calculateCarbGoal(),
-      fatGoal: calculateFatGoal(),
-      waterGoal: calculateWaterGoal(),
+      dailyCalories: dailyCals,
+      proteinGoal: macros['protein']!,
+      carbsGoal: macros['carbs']!,
+      fatGoal: macros['fat']!,
+      waterGoal: water,
       lastUpdated: DateTime.now(),
     );
   }

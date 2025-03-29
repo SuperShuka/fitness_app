@@ -1937,7 +1937,7 @@ class _ProfileSetupFlowState extends State<ProfileSetupFlow>
         height: _height,
         weight: _weight,
         targetWeight: _targetWeight,
-        primaryGoal: "lose_weight",
+        primaryGoal: _targetWeight < _weight ? 'lose_weight' : 'gain_weight',
         workoutFrequency: _workoutFrequency!,
         weeklyGoal: _weeklyGoal,
         dailyCalories: dailyCalories,

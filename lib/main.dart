@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_app/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,8 +22,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: true,
-      home: AuthWrapper(),
-    );
+        debugShowCheckedModeBanner: true,
+        home: AuthWrapper(),
+        routes: {
+          '/profile': (context) => ProfileScreen(),
+          '/login': (context) => LoginScreen(),
+        });
   }
 }
