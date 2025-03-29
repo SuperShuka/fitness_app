@@ -44,12 +44,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   double calculateCaloriesLeft(List<LogItem> logs) {
     final dailyCalorieGoal = userProfile?.dailyCalories.toDouble() ?? 2500.0;
-    final totalConsumedCalories = logs.fold(0, (total, log) => total + log.calories);
+    final totalConsumedCalories = logs.fold(0, (total, log) => total + log.calories.round());
     return dailyCalorieGoal - totalConsumedCalories;
   }
 
   List<MacroItem> calculateMacroBreakdown(List<LogItem> logs) {
-    int protein = 0, carbs = 0, fat = 0;
+    double protein = 0, carbs = 0, fat = 0;
 
     for (var log in logs) {
       if (log.macros != null) {
@@ -71,21 +71,21 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     return [
       MacroItem(
         name: "Protein",
-        left: (userProfile?.proteinGoal ?? 100) - protein,
+        left: (userProfile?.proteinGoal ?? 100) - protein.round(),
         total: userProfile?.proteinGoal ?? 100,
         icon: Icons.fastfood,
         color: Colors.red,
       ),
       MacroItem(
         name: "Carbs",
-        left: (userProfile?.carbsGoal ?? 300) - carbs,
+        left: (userProfile?.carbsGoal ?? 300) - carbs.round(),
         total: userProfile?.carbsGoal ?? 300,
         icon: Icons.bakery_dining,
         color: Colors.green,
       ),
       MacroItem(
         name: "Fat",
-        left: (userProfile?.fatGoal ?? 50) - fat,
+        left: (userProfile?.fatGoal ?? 50) - fat.round(),
         total: userProfile?.fatGoal ?? 50,
         icon: Icons.cake,
         color: Colors.orange,

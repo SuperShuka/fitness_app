@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 class LogItem {
   final String name;
-  final int calories;
+  final double calories;
   final DateTime timestamp;
   final LogItemType type;
   final List<MacroDetail>? macros;
-  final double? weight; // Add weight property
-  final double? baseWeight; // Add base weight for original recipe
+  final int? weight; // Add weight property
+  final int? baseWeight; // Add base weight for original recipe
 
   LogItem({
     required this.name,
@@ -30,12 +30,12 @@ class LogItem {
     List<MacroDetail> adjustedMacros = macros!.map((macro) {
       return MacroDetail(
         icon: macro.icon,
-        value: (macro.value * scaleFactor).round(),
+        value: (macro.value * scaleFactor),
       );
     }).toList();
 
     // Adjust calories proportionally
-    int adjustedCalories = (calories * scaleFactor).round();
+    double adjustedCalories = (calories * scaleFactor);
 
     return LogItem(
       name: name,
@@ -51,7 +51,7 @@ class LogItem {
 
 class MacroDetail {
   final String icon;
-  final int value;
+  final double value;
 
   MacroDetail({
     required this.icon,

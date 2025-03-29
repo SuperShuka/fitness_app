@@ -30,7 +30,6 @@ class NutritionApiService {
         List<LogItem> logItems = [];
 
         for (var food in data['foods']) {
-          dPrint("adding ${food['food_name']}");
           logItems.add(LogItem(
             name: food['food_name'] ?? foodDescription,
             calories: food['nf_calories']?.toInt() ?? 0,
@@ -50,6 +49,8 @@ class NutritionApiService {
                   value: food['nf_total_fat']?.toInt() ?? 0
               ),
             ],
+            weight: food['nf_serving_weight_grams']?.toInt() ?? 0,
+            baseWeight: food['nf_serving_weight_grams']?.toInt() ?? 0,
           ));
         }
 
@@ -77,24 +78,25 @@ class NutritionApiService {
 
         return LogItem(
           name: product.productName ?? 'Scanned Item',
-          calories: product.nutriments?.getValue(Nutrient.energyKCal, PerSize.oneHundredGrams)?.toInt() ?? 0,
+          calories: product.nutriments?.getValue(Nutrient.energyKCal, PerSize.oneHundredGrams)?.toDouble() ?? 0.0,
           timestamp: DateTime.now(),
           type: LogItemType.meal,
           macros: [
             MacroDetail(
               icon: '🍗',
-              value: product.nutriments?.getValue(Nutrient.proteins, PerSize.oneHundredGrams)?.toInt() ?? 0,
+              value: product.nutriments?.getValue(Nutrient.proteins, PerSize.oneHundredGrams)?.toDouble() ?? 0.0,
             ),
             MacroDetail(
               icon: '🍞',
-              value: product.nutriments?.getValue(Nutrient.carbohydrates, PerSize.oneHundredGrams)?.toInt() ?? 0,
+              value: product.nutriments?.getValue(Nutrient.carbohydrates, PerSize.oneHundredGrams)?.toDouble() ?? 0.0,
             ),
             MacroDetail(
               icon: '🧀',
-              value: product.nutriments?.getValue(Nutrient.fat, PerSize.oneHundredGrams)?.toInt() ?? 0,
+              value: product.nutriments?.getValue(Nutrient.fat, PerSize.oneHundredGrams)?.toDouble() ?? 0.0,
             ),
           ],
-
+          weight: 100,
+          baseWeight: 100
         );
       }
     } catch (e) {

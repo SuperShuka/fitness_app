@@ -23,7 +23,7 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
   late TextEditingController _caloriesController;
   late TextEditingController _weightController;
   late List<TextEditingController> _macroControllers;
-  double _originalWeight = 100.0;
+  int _originalWeight = 100;
   bool _isAdjusting = false;
 
   @override
@@ -33,7 +33,7 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
     _caloriesController = TextEditingController(text: widget.logItem.calories.toString());
 
     // Initialize weight controller
-    _originalWeight = widget.logItem.baseWeight ?? 100.0;
+    _originalWeight = widget.logItem.baseWeight ?? 100;
     _weightController = TextEditingController(
         text: (widget.logItem.weight ?? _originalWeight).toString()
     );
@@ -89,31 +89,50 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
             const SizedBox(height: 16),
 
             // Weight Input with slider
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTextField(
-                  controller: _weightController,
-                  label: 'Weight',
-                  icon: Icons.scale,
-                  suffix: 'g',
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                  ],
-                  onChanged: (value) {
-                    if (!_isAdjusting) {
-                      setState(() {
-                        _updateMacrosBasedOnWeight();
-                      });
-                    }
-                  },
-                ),
-
-                // Weight slider
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                  child: Row(
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.scale, color: Colors.black54),
+                          SizedBox(width: 12),
+                          Text(
+                            'Weight',
+                            style: GoogleFonts.poppins(
+                              color: Colors.grey.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '${_weightController.text}g',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Row(
                     children: [
                       Text(
                         '0g',
@@ -122,15 +141,15 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
                       Expanded(
                         child: SliderTheme(
                           data: SliderTheme.of(context).copyWith(
-                            activeTrackColor: Colors.orange,
-                            inactiveTrackColor: Colors.orange.withOpacity(0.2),
-                            thumbColor: Colors.orange,
+                            activeTrackColor: Theme.of(context).primaryColor,
+                            inactiveTrackColor: Theme.of(context).primaryColor.withOpacity(0.2),
+                            thumbColor: Theme.of(context).primaryColor,
                             trackHeight: 4.0,
                           ),
                           child: Slider(
                             min: 0,
-                            max: _originalWeight * 3, // Allow up to 3x the original weight
-                            value: double.tryParse(_weightController.text) ?? _originalWeight,
+                            max: 500.0,
+                            value: int.tryParse(_weightController.text)?.toDouble() ?? _originalWeight.toDouble(),
                             onChanged: (value) {
                               _isAdjusting = true;
                               setState(() {
@@ -143,13 +162,13 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
                         ),
                       ),
                       Text(
-                        '${(_originalWeight * 3).toStringAsFixed(0)}g',
+                        '500g',
                         style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                       ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
 
             const SizedBox(height: 16),
@@ -284,8 +303,8 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
   void _updateMacrosBasedOnWeight() {
     if (widget.logItem.baseWeight == null && _originalWeight <= 0) return;
 
-    double currentWeight = double.tryParse(_weightController.text) ?? _originalWeight;
-    double baseWeight = widget.logItem.baseWeight ?? _originalWeight;
+    int currentWeight = int.tryParse(_weightController.text) ?? _originalWeight;
+    int baseWeight = widget.logItem.baseWeight ?? _originalWeight;
     double scaleFactor = currentWeight / baseWeight;
 
     // Update calories
@@ -294,8 +313,8 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
 
     // Update macros
     for (int i = 0; i < _macroControllers.length; i++) {
-      int originalMacroValue = widget.logItem.macros![i].value;
-      int newMacroValue = (originalMacroValue * scaleFactor).round();
+      double originalMacroValue = widget.logItem.macros![i].value;
+      double newMacroValue = (originalMacroValue * scaleFactor);
       _macroControllers[i].text = newMacroValue.toString();
     }
   }
@@ -328,7 +347,7 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
     // Create an updated LogItem
     final updatedLogItem = LogItem(
       name: _nameController.text,
-      calories: int.parse(_caloriesController.text),
+      calories: double.parse(_caloriesController.text),
       timestamp: widget.logItem.timestamp,
       type: widget.logItem.type,
       macros: widget.logItem.macros?.asMap().entries.map((entry) {
@@ -336,10 +355,10 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
         final macro = entry.value;
         return MacroDetail(
           icon: macro.icon,
-          value: int.parse(_macroControllers[index].text),
+          value: double.parse(_macroControllers[index].text),
         );
       }).toList(),
-      weight: double.tryParse(_weightController.text),
+      weight: int.tryParse(_weightController.text),
       baseWeight: widget.logItem.baseWeight ?? _originalWeight,
     );
 
