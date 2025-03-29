@@ -28,7 +28,8 @@ class FirebaseLogsService {
           'icon': macro.icon,
           'value': macro.value
         }).toList(),
-        'image': logItem.image
+        'weight': logItem.weight,
+        'baseWeight': logItem.baseWeight
       });
     } catch (e) {
       print('Error adding log item: $e');
@@ -63,7 +64,8 @@ class FirebaseLogsService {
                   value: m['value']
               )
           ).toList(),
-          image: data['image']
+          weight: data['weight'],
+          baseWeight: data['baseWeight'],
       );
     }).toList());
   }
@@ -95,8 +97,9 @@ class FirebaseLogsService {
           'icon': macro.icon,
           'value': macro.value
         }).toList(),
-        'image': log.image
-      });
+        'weight': log.weight,
+        'baseWeight': log.baseWeight,
+        });
     }
 
     await batch.commit();

@@ -84,17 +84,6 @@ class LogList extends ConsumerWidget {
                           padding: const EdgeInsets.all(12.0),
                           child: Row(
                             children: [
-                              if (log.image != null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.asset(
-                                        log.image!,
-                                        width: 80,
-                                        height: 80,
-                                        fit: BoxFit.cover,
-                                      ) ??
-                                      Icon(Icons.image),
-                                ),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
