@@ -32,25 +32,24 @@ class NutritionApiService {
         for (var food in data['foods']) {
           logItems.add(LogItem(
             name: food['food_name'] ?? foodDescription,
-            calories: food['nf_calories']?.toInt() ?? 0,
+            calories: food['nf_calories']?.toDouble() ?? 0.0,
             timestamp: DateTime.now(),
             type: LogItemType.meal,
             macros: [
               MacroDetail(
                   icon: '🍗',
-                  value: food['nf_protein']?.toInt() ?? 0
+                  value: food['nf_protein']?.toDouble() ?? 0.0
               ),
               MacroDetail(
                   icon: '🍞',
-                  value: food['nf_total_carbohydrate']?.toInt() ?? 0
+                  value: food['nf_total_carbohydrate']?.toDouble() ?? 0.0
               ),
               MacroDetail(
                   icon: '🧀',
-                  value: food['nf_total_fat']?.toInt() ?? 0
+                  value: food['nf_total_fat']?.toDouble() ?? 0.0
               ),
             ],
-            weight: food['nf_serving_weight_grams']?.toInt() ?? 0,
-            baseWeight: food['nf_serving_weight_grams']?.toInt() ?? 0,
+            weight: food['serving_weight_grams']?.toInt() ?? 0,
           ));
         }
 
@@ -96,7 +95,6 @@ class NutritionApiService {
             ),
           ],
           weight: 100,
-          baseWeight: 100
         );
       }
     } catch (e) {

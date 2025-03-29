@@ -6,19 +6,19 @@ import '../models/log_item.dart';
 import '../services/logs_notifier.dart';
 import '../services/firestore_logs_service.dart';
 
-class FoodDetailsWidget extends ConsumerStatefulWidget {
+class FoodEditWidget extends ConsumerStatefulWidget {
   final LogItem logItem;
 
-  const FoodDetailsWidget({
+  const FoodEditWidget({
     Key? key,
     required this.logItem,
   }) : super(key: key);
 
   @override
-  _FoodDetailsWidgetState createState() => _FoodDetailsWidgetState();
+  _FoodEditWidgetState createState() => _FoodEditWidgetState();
 }
 
-class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
+class _FoodEditWidgetState extends ConsumerState<FoodEditWidget> {
   late TextEditingController _nameController;
   late TextEditingController _caloriesController;
   late TextEditingController _weightController;
@@ -30,17 +30,17 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.logItem.name);
-    _caloriesController = TextEditingController(text: widget.logItem.calories.toString());
+    _caloriesController = TextEditingController(text: widget.logItem.calories.toInt().toString());
 
     // Initialize weight controller
-    _originalWeight = widget.logItem.baseWeight ?? 100;
+    _originalWeight = widget.logItem.weight ?? 100;
     _weightController = TextEditingController(
         text: (widget.logItem.weight ?? _originalWeight).toString()
     );
 
     // Initialize macro controllers
     _macroControllers = widget.logItem.macros?.map((macro) =>
-        TextEditingController(text: macro.value.toString())
+        TextEditingController(text: macro.value.toInt().toString())
     ).toList() ?? [];
   }
 
@@ -58,12 +58,13 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF5F5DC), // Keeping the beige background
       appBar: AppBar(
         title: Text(
           'Food Details',
           style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFFF5F5DC), // Keeping the beige background
         elevation: 0,
         actions: [
           IconButton(
@@ -149,7 +150,7 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
                           child: Slider(
                             min: 0,
                             max: 500.0,
-                            value: int.tryParse(_weightController.text)?.toDouble() ?? _originalWeight.toDouble(),
+                            value: double.tryParse(_weightController.text)?.toDouble() ?? _originalWeight.toDouble(),
                             onChanged: (value) {
                               _isAdjusting = true;
                               setState(() {
@@ -211,7 +212,7 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
                     controller: _macroControllers[index],
                     label: _getMacroLabel(macro.icon),
                     icon: _getMacroIcon(macro.icon),
-                    iconColor: _getMacroColor(macro.icon),
+                    iconColor: Color(0xFF8B4513),
                     suffix: 'g',
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -301,21 +302,18 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
   }
 
   void _updateMacrosBasedOnWeight() {
-    if (widget.logItem.baseWeight == null && _originalWeight <= 0) return;
-
-    int currentWeight = int.tryParse(_weightController.text) ?? _originalWeight;
-    int baseWeight = widget.logItem.baseWeight ?? _originalWeight;
-    double scaleFactor = currentWeight / baseWeight;
+    double currentWeight = double.tryParse(_weightController.text) ?? _originalWeight.toDouble();
+    double scaleFactor = currentWeight / _originalWeight;
 
     // Update calories
-    int newCalories = (widget.logItem.calories * scaleFactor).round();
-    _caloriesController.text = newCalories.toString();
+    double newCalories = (widget.logItem.calories * scaleFactor);
+    _caloriesController.text = newCalories.toInt().toString();
 
     // Update macros
     for (int i = 0; i < _macroControllers.length; i++) {
       double originalMacroValue = widget.logItem.macros![i].value;
       double newMacroValue = (originalMacroValue * scaleFactor);
-      _macroControllers[i].text = newMacroValue.toString();
+      _macroControllers[i].text = newMacroValue.toInt().toString();
     }
   }
 
@@ -348,7 +346,7 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
     final updatedLogItem = LogItem(
       name: _nameController.text,
       calories: double.parse(_caloriesController.text),
-      timestamp: widget.logItem.timestamp,
+      timestamp: widget.logItem.timestamp.add(Duration(seconds: 1)),
       type: widget.logItem.type,
       macros: widget.logItem.macros?.asMap().entries.map((entry) {
         final index = entry.key;
@@ -358,8 +356,7 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
           value: double.parse(_macroControllers[index].text),
         );
       }).toList(),
-      weight: int.tryParse(_weightController.text),
-      baseWeight: widget.logItem.baseWeight ?? _originalWeight,
+      weight: double.tryParse(_weightController.text)?.round(),
     );
 
     if (updatedLogItem != widget.logItem) {
@@ -407,19 +404,6 @@ class _FoodDetailsWidgetState extends ConsumerState<FoodDetailsWidget> {
         return Icons.opacity;
       default:
         return Icons.food_bank;
-    }
-  }
-
-  Color _getMacroColor(String icon) {
-    switch (icon) {
-      case '🍗':
-        return Colors.red.shade700;  // Red for protein
-      case '🍞':
-        return Colors.amber.shade700;  // Amber for carbs
-      case '🧀':
-        return Colors.blue.shade700;  // Blue for fat
-      default:
-        return Colors.grey.shade700;
     }
   }
 }

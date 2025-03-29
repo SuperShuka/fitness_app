@@ -173,7 +173,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                       // Meal Log List Widget
                       LogList(logs: logs),
 
-                      SizedBox(height: 100),
+                      SizedBox(height: 200),
                     ],
                   ),
                 ),

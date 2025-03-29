@@ -29,7 +29,6 @@ class FirebaseLogsService {
           'value': macro.value
         }).toList(),
         'weight': logItem.weight,
-        'baseWeight': logItem.baseWeight
       });
     } catch (e) {
       print('Error adding log item: $e');
@@ -65,7 +64,6 @@ class FirebaseLogsService {
               )
           ).toList(),
           weight: data['weight'],
-          baseWeight: data['baseWeight'],
       );
     }).toList());
   }
@@ -98,7 +96,6 @@ class FirebaseLogsService {
           'value': macro.value
         }).toList(),
         'weight': log.weight,
-        'baseWeight': log.baseWeight,
         });
     }
 

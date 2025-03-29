@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/firestore_logs_service.dart';
 import '../services/logs_notifier.dart';
-import 'food_details_widget.dart';
+import 'food_edit_widget.dart';
 
 class LogList extends ConsumerWidget {
   final List<LogItem> logs;
@@ -63,7 +63,7 @@ class LogList extends ConsumerWidget {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                           builder: (context) =>
-                              FoodDetailsWidget(logItem: log)),
+                              FoodEditWidget(logItem: log)),
                     );
                   },
                   child: Container(

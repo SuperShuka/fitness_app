@@ -7,7 +7,6 @@ class LogItem {
   final LogItemType type;
   final List<MacroDetail>? macros;
   final int? weight; // Add weight property
-  final int? baseWeight; // Add base weight for original recipe
 
   LogItem({
     required this.name,
@@ -16,12 +15,11 @@ class LogItem {
     required this.type,
     this.macros,
     this.weight,
-    this.baseWeight,
   });
 
   // Method to calculate adjusted macros based on weight
-  LogItem adjustMacrosByWeight() {
-    if (baseWeight == null || weight == null || macros == null) return this;
+  LogItem adjustMacrosByWeight(int baseWeight) {
+    if (weight == null || macros == null) return this;
 
     // Calculate weight scaling factor
     double scaleFactor = weight! / baseWeight!;
@@ -44,7 +42,6 @@ class LogItem {
       type: type,
       macros: adjustedMacros,
       weight: weight,
-      baseWeight: baseWeight,
     );
   }
 }

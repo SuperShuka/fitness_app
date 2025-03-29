@@ -53,7 +53,7 @@ class _DescribeFoodWidgetState extends ConsumerState<DescribeFoodWidget> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFF5F5DC), Color(0xFFE5E5DB)],
+            colors: [Color(0xFFF5F5DC), Color(0xFFE5E5DB)], // Beige gradient
           ),
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
