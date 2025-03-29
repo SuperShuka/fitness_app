@@ -348,7 +348,7 @@ class _FoodEditWidgetState extends ConsumerState<FoodEditWidget> {
     final updatedLogItem = LogItem(
       name: _nameController.text,
       calories: double.parse(_caloriesController.text),
-      timestamp: widget.logItem.timestamp.add(Duration(seconds: 1)),
+      timestamp: widget.logItem.timestamp,
       type: widget.logItem.type,
       macros: widget.logItem.macros?.asMap().entries.map((entry) {
         final index = entry.key;
